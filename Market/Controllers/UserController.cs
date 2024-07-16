@@ -40,6 +40,8 @@ namespace Market.Controllers
 
                 if (createUserDto.Password != createUserDto.ConfirmationPassword) return BadRequest("Password and Confirmation Password do not match");
 
+                if(string.IsNullOrEmpty(createUserDto.Role)) createUserDto.Role = "User";
+
                 var user = _mapper.Map<User>(createUserDto);
                 var createdUser = await _userService.Create(user, createUserDto.Role);
                 var userDto = _mapper.Map<UserDto>(createdUser);

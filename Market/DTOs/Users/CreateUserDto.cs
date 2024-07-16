@@ -8,6 +8,6 @@
         public string Password { get; set; }
         public string ConfirmationPassword { get; set; }
         public string PhoneNumber { get; set; }
-        public string Role { get; set; } = "User";
+        public string Role { get; set; }
     }
 }
