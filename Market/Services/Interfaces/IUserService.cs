@@ -9,9 +9,6 @@ namespace Market.Services.Interfaces
         Task<bool> Delete(int id);
         Task<User> Get(int id);
         Task<IEnumerable<User>> GetAll(int page, int pageSize);
-        Task<bool> ValidateEmail(string codeValidation);
-        Task<string> Authenticate(string username, string password);
-        Task<bool> ChangePassword(int userId, string oldPassword, string newPassword);
         Task<bool> Exists(int id);
         Task<IEnumerable<string>> GetUserRoles(int userId);
     }

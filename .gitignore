@@ -24,3 +24,7 @@
 /.vs/Market/v17/DocumentLayout.json
 /.vs/Market/v17/TestStore/0/000.testlog
 /.vs/Market/DesignTimeBuild/.dtbcache.v2
+/Market/appsettings.json
+/Market/bin/Debug/net8.0/appsettings.json
+/Market/obj/Debug/net8.0/Market.AssemblyInfo.cs
+/Market/obj/Debug/net8.0/Market.csproj.CoreCompileInputs.cache
