@@ -62,6 +62,8 @@ namespace Market.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> Get(int id)
         {
+            if (id <= 0) return BadRequest("Invalid id");
+
             try
             {
                 var user = await _userService.Get(id);
@@ -79,6 +81,8 @@ namespace Market.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
+            if (page <= 0) return BadRequest("Invalid page number");
+
             try
             {
                 var users = await _userService.GetAll(page, pageSize);
@@ -94,10 +98,21 @@ namespace Market.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto userDto)
         {
+            if (id <= 0) return BadRequest("Invalid id");
+            if (userDto == null) return BadRequest("User data is required");
+            if (string.IsNullOrEmpty(userDto.Name)) return BadRequest("Name is required");
+            if (string.IsNullOrEmpty(userDto.LastName)) return BadRequest("Last Name is required");
+            if (string.IsNullOrEmpty(userDto.Email)) return BadRequest("Email is required");
+            if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Phone Number is required");
+            if (string.IsNullOrEmpty(userDto.Password)) return BadRequest("Password is required");
+            if (string.IsNullOrEmpty(userDto.ConfirmationPassword)) return BadRequest("Confirmation Password is required");
+
             try
             {
                 if (id != userDto.Id)
                     return BadRequest();
+
+                if (userDto.Password != userDto.ConfirmationPassword) return BadRequest("Password and Confirmation Password do not match");
 
                 var user = _mapper.Map<User>(userDto);
                 var updatedUser = await _userService.Update(user);
@@ -117,6 +132,7 @@ namespace Market.Controllers
         {
             try
             {
+                throw new Exception("Error deleting user");
                 var result = await _userService.Delete(id);
                 if (!result)
                     return NotFound();
@@ -128,47 +144,5 @@ namespace Market.Controllers
                 return StatusCode(500, "An error occurred while deleting the user");
             }
         }
-
-        [HttpPost("validate-email")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ValidateEmail([FromBody] string codeValidation)
-        {
-            try
-            {
-                var result = await _userService.ValidateEmail(codeValidation);
-                if (!result)
-                    return BadRequest("Invalid validation code");
-                return Ok("Email validated successfully");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating email");
-                return StatusCode(500, "An error occurred while validating the email");
-            }
-        }
-
-        [HttpPost("authenticate")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Authenticate([FromBody] AuthRequest request)
-        {
-            try
-            {
-                var token = await _userService.Authenticate(request.Username, request.Password);
-                if (string.IsNullOrEmpty(token))
-                    return Unauthorized();
-                return Ok(new { token });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during authentication");
-                return StatusCode(500, "An error occurred during authentication");
-            }
-        }
-    }
-
-    public class AuthRequest
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 }

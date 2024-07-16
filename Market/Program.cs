@@ -44,6 +44,12 @@ namespace Market
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IRoleService, RoleService>();
 
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddTransient<IEmailService, EmailService>();
+
+            services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
+
 
             // Configuración de AutoMapper
             services.AddAutoMapper(typeof(MappingProfile));
@@ -120,4 +126,14 @@ namespace Market
             // app.MapHealthChecks("/health");
         }
     }
+
+    public class SmtpSettings
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string From { get; set; }
+    }
+
 }

@@ -1,4 +1,5 @@
 ﻿using Market.Data.Repositories.Interfaces;
+using Market.Middleware;
 using Market.Models;
 using Market.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,7 @@ namespace Market.Services
         private readonly IRoleRepository _roleRepository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<UserService> _logger;
+        private Utilities _utilities;
 
         public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<UserService> logger)
         {
@@ -33,9 +35,10 @@ namespace Market.Services
             {
                 throw new InvalidOperationException("Email already exists");
             }
+            if (_utilities == null) _utilities = new Utilities();
 
             user.Password = HashPassword(user.Password);
-            user.ValidationCode = GenerateValidationCode();
+            user.ValidationCode = _utilities.GenerateValidationCode();
 
             var role = await _roleRepository.GetByName(roleName);
             if (role == null)
@@ -46,8 +49,18 @@ namespace Market.Services
             user.UserRoles = new List<UserRole> { new UserRole { RoleId = role.Id } };
 
             var createdUser = await _userRepository.Create(user);
+
+            SendValidationEmail(createdUser);
+
             _logger.LogInformation($"User created with role {roleName}: {createdUser.Id}");
             return createdUser;
+        }
+
+        internal void SendValidationEmail(User user)
+        {
+            // Send email with validation code
+
+            
         }
 
         public async Task<User> Update(User user)
@@ -71,43 +84,6 @@ namespace Market.Services
             return await _userRepository.GetAll(page, pageSize);
         }
 
-        public async Task<bool> ValidateEmail(string codeValidation)
-        {
-            var user = await _userRepository.GetByValidationCode(codeValidation);
-            if (user == null) return false;
-
-            user.IsEmailValidated = true;
-            user.ValidationCode = null;
-            await _userRepository.Update(user);
-            return true;
-        }
-
-        public async Task<string> Authenticate(string username, string password)
-        {
-            var user = await _userRepository.GetByEmail(username);
-            if (user == null || !VerifyPassword(password, user.Password))
-            {
-                return null;
-            }
-
-            var token = GenerateJwtToken(user);
-            _logger.LogInformation($"User authenticated: {user.Id}");
-            return token;
-        }
-
-        public async Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
-        {
-            var user = await _userRepository.Get(userId);
-            if (user == null || !VerifyPassword(oldPassword, user.Password))
-            {
-                return false;
-            }
-
-            user.Password = HashPassword(newPassword);
-            await _userRepository.Update(user);
-            return true;
-        }
-
         public async Task<bool> Exists(int id)
         {
             return await _userRepository.Exists(id);
@@ -121,38 +97,6 @@ namespace Market.Services
         private string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
-        }
-
-        private bool VerifyPassword(string password, string hashedPassword)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
-        }
-
-        private string GenerateValidationCode()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
