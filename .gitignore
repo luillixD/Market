@@ -2,29 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/Market/FileContentIndex
-/Market/obj/Debug/net8.0/apphost.exe
-/Market/obj/Debug/net8.0/Market.AssemblyInfoInputs.cache
-/Market/obj/Debug/net8.0/Market.dll
-/Market/obj/Debug/net8.0/Market.pdb
-/Market/obj/Debug/net8.0/Market.sourcelink.json
-/Market/obj/Debug/net8.0/refint/Market.dll
-/Market/obj/Debug/net8.0/apphost.exe
-/Market/obj/Debug/net8.0/Market.AssemblyInfoInputs.cache
-/Market/obj/Debug/net8.0/Market.dll
-/Market/obj/Debug/net8.0/Market.pdb
-/Market/obj/Debug/net8.0/Market.sourcelink.json
-/Market/obj/Debug/net8.0/refint/Market.dll
-/Market/obj/Debug/net8.0/ref/Market.dll
-/Market/bin/Debug/net8.0/Market.dll
-/Market/bin/Debug/net8.0/Market.exe
-/Market/bin/Debug/net8.0/Market.pdb
-/.vs/Market/v17/.futdcache.v2
-/.vs/Market/v17/.suo
-/.vs/Market/v17/DocumentLayout.json
-/.vs/Market/v17/TestStore/0/000.testlog
-/.vs/Market/DesignTimeBuild/.dtbcache.v2
-/Market/appsettings.json
-/Market/bin/Debug/net8.0/appsettings.json
-/Market/obj/Debug/net8.0/Market.AssemblyInfo.cs
-/Market/obj/Debug/net8.0/Market.csproj.CoreCompileInputs.cache
+.vs/
+Market/obj/
+Market/bin/
+Market/appsettings.json
