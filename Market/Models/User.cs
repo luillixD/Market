@@ -9,10 +9,7 @@ namespace Market.Models
 
         [Required]
         [StringLength(50)]
-        public string Name { get; set; }
-
-        [StringLength(50)]
-        public string LastName { get; set; }
+        public string FullName { get; set; }
 
         [Required]
         [EmailAddress]
@@ -30,7 +27,7 @@ namespace Market.Models
 
         public string ValidationCode { get; set; }
 
-        public bool IsEmailValidated { get; set; } = false;
+        public bool IsActiveUser { get; set; } = false;
 
         public ICollection<UserRole> UserRoles { get; set; }
     }

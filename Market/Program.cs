@@ -21,6 +21,39 @@ namespace Market
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+
+                    logger.LogInformation("Checking database...");
+
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        logger.LogInformation("Applying pending migrations...");
+                        context.Database.Migrate();
+                        logger.LogInformation("Migrations applied successfully.");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Database is up to date. No migrations needed.");
+                    }
+
+                    // Aquí puedes añadir lógica para sembrar datos iniciales si es necesario
+                    DatabaseSeeder.SeedData(services);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating or initializing the database.");
+                    throw; // Re-lanza la excepción para asegurar que la aplicación no se inicie con una base de datos en mal estado
+                }
+            }
+
+
             ConfigureApp(app);
 
             app.Run();
@@ -50,6 +83,7 @@ namespace Market
 
             services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
 
+            services.Configure<Urls>(configuration.GetSection("URLs"));
 
             // Configuración de AutoMapper
             services.AddAutoMapper(typeof(MappingProfile));
@@ -125,6 +159,12 @@ namespace Market
             // TODO: Considera añadir el endpoint de Health Checks
             // app.MapHealthChecks("/health");
         }
+    }
+
+    public class Urls
+    {
+        public string UI { get; set; }
+        public string LN { get; set; }
     }
 
     public class SmtpSettings

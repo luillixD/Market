@@ -24,41 +24,6 @@ namespace Market.Controllers
             _logger = logger;
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto createUserDto)
-        {
-            try
-            {
-                if(createUserDto == null) return BadRequest("User data is required");
-                if(string.IsNullOrEmpty(createUserDto.Name)) return BadRequest("Name is required");
-                if(string.IsNullOrEmpty(createUserDto.LastName)) return BadRequest("Last Name is required");
-                if(string.IsNullOrEmpty(createUserDto.Email)) return BadRequest("Email is required");
-                if(string.IsNullOrEmpty(createUserDto.PhoneNumber)) return BadRequest("Phone Number is required");
-                if(string.IsNullOrEmpty(createUserDto.Password)) return BadRequest("Password is required");
-                if(string.IsNullOrEmpty(createUserDto.ConfirmationPassword)) return BadRequest("Confirmation Password is required");
-
-                if (createUserDto.Password != createUserDto.ConfirmationPassword) return BadRequest("Password and Confirmation Password do not match");
-
-                if(string.IsNullOrEmpty(createUserDto.Role)) createUserDto.Role = "User";
-
-                var user = _mapper.Map<User>(createUserDto);
-                var createdUser = await _userService.Create(user, createUserDto.Role);
-                var userDto = _mapper.Map<UserDto>(createdUser);
-                return CreatedAtAction(nameof(Get), new { id = userDto.Id }, userDto);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning(ex, "Invalid operation when creating user");
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating user");
-                return StatusCode(500, "An error occurred while creating the user");
-            }
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> Get(int id)
         {
@@ -79,6 +44,7 @@ namespace Market.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (page <= 0) return BadRequest("Invalid page number");
@@ -100,8 +66,7 @@ namespace Market.Controllers
         {
             if (id <= 0) return BadRequest("Invalid id");
             if (userDto == null) return BadRequest("User data is required");
-            if (string.IsNullOrEmpty(userDto.Name)) return BadRequest("Name is required");
-            if (string.IsNullOrEmpty(userDto.LastName)) return BadRequest("Last Name is required");
+            if (string.IsNullOrEmpty(userDto.FullName)) return BadRequest("Name is required");
             if (string.IsNullOrEmpty(userDto.Email)) return BadRequest("Email is required");
             if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Phone Number is required");
             if (string.IsNullOrEmpty(userDto.Password)) return BadRequest("Password is required");

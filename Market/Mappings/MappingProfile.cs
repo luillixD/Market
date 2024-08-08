@@ -12,7 +12,7 @@ namespace Market.Mappings
         {
             CreateMap<CreateUserDto, User>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-                .ForMember(dest => dest.IsEmailValidated, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.IsActiveUser, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 
             CreateMap<User, UserDto>()
@@ -21,7 +21,7 @@ namespace Market.Mappings
             CreateMap<UserDto, User>();
 
             CreateMap<RegisterDto, User>()
-            .ForMember(dest => dest.IsEmailValidated, opt => opt.MapFrom(src => false))
+            .ForMember(dest => dest.IsActiveUser, opt => opt.MapFrom(src => false))
             .ForMember(dest => dest.UserRoles, opt => opt.MapFrom(src => new List<UserRole> 
             { 
                 new UserRole { RoleId = 2 } 

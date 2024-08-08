@@ -47,8 +47,9 @@ namespace Market.Data.Repositories
             var role = await GetById(id);
             if (role == null)
                 return false;
+            role.IsActiveRole = false;
 
-            _context.Roles.Remove(role);
+            _context.Entry(role).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return true;
         }
