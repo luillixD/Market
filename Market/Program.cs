@@ -48,6 +48,9 @@ namespace Market
             services.AddScoped<ILoginService, LoginService>();
             services.AddTransient<IEmailService, EmailService>();
 
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+
             services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
 
 

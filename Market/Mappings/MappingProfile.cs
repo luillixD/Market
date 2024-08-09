@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Market.DTOs.Login;
+using Market.DTOs.Product;
 using Market.DTOs.Roles;
 using Market.DTOs.Users;
 using Market.Models;
@@ -35,6 +36,10 @@ namespace Market.Mappings
             CreateMap<Role, RoleDto>();
 
             CreateMap<UpdateRoleDto, Role>();
+
+            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Product, CreateProductDto>().ReverseMap();
+            CreateMap<Product, UpdateProductDto>().ReverseMap();
 
         }
     }
