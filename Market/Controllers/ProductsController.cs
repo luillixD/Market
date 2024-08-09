@@ -9,17 +9,35 @@ namespace Market.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _service;
+        private readonly ISubcategoryService _subcategoryService;
+        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService service)
+        public ProductsController(IProductService service, ISubcategoryService subcategoryService, ILogger<ProductsController> logger)
         {
             _service = service;
+            _subcategoryService = subcategoryService;
+            _logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> Add(CreateProductDto productDto)
         {
-            var product = await _service.AddAsync(productDto);
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                // Check if the subcategory exists
+                var subcategoryExists = await _subcategoryService.ExistsAsync(productDto.SubcategoryId);
+                if (!subcategoryExists) return NotFound(new { message = "The specified subcategory does not exist." });
+                
+                var product = await _service.AddAsync(productDto);
+                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating product");
+                return StatusCode(500, "An error occurred while creating the product");
+            }
         }
 
         [HttpPut("{id}")]
