@@ -6,8 +6,11 @@ namespace Market.Services.Interfaces
     {
         Task<User> Register(User user);
         Task<string> Authenticate(string username, string password);
-        Task<bool> ForgetPassword(int userId, string newPassword);
-        Task<bool> ChangePassword(int userId, string oldPassword, string newPassword);
+        Task<bool> ForgetPassword(string userId, string newPassword);
+        Task<bool> ChangePassword(string email, string oldPassword, string newPassword);
         Task<bool> ValidateEmail(string codeValidation);
+        bool IsValidEmail(string email);
+        bool IsValidPassword(string password);
+
     }
 }

@@ -1,8 +1,13 @@
-﻿namespace Market.DTOs.Login
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Market.DTOs.Login
 {
     public class ForgetPasswordDto
     {
-        public int UserId { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+        [Required]
         public string NewPassword { get; set; }
     }
 }

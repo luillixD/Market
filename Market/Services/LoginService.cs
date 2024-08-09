@@ -4,9 +4,12 @@ using Market.Models;
 using Market.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Market.Services
 {
@@ -42,7 +45,6 @@ namespace Market.Services
 
             user.Password = _utilities.HashPassword(user.Password);
             user.ValidationCode = _utilities.GenerateValidationCode();
-
             var role = await _roleRepository.GetById(user.UserRoles.FirstOrDefault().RoleId);
             if (role == null)
             {
@@ -52,9 +54,9 @@ namespace Market.Services
             user.UserRoles = new List<UserRole> { new UserRole { RoleId = role.Id } };
 
             var createdUser = await _userRepository.Create(user);
-
+#if !DEBUG
             await _emailSender.SendEmailAsync(user.Email, "Email Validation", $"Please validate your email by clicking <a href='https://localhost:44333/api/Login/validate-email/{user.ValidationCode}'>here</a>");
-
+#endif 
             _logger.LogInformation($"User created with role {role.Name}: {createdUser.Id}");
             return createdUser;
         }
@@ -72,11 +74,12 @@ namespace Market.Services
             return token;
         }
 
-        public async Task<bool> ForgetPassword(int userId, string newPassword)
+        public async Task<bool> ForgetPassword(string email, string newPassword)
         {
+            if (_utilities == null) _utilities = new Utilities();
             if (string.IsNullOrEmpty(newPassword)) return false;
-            var user = await _userRepository.Get(userId);
-            if (user == null)
+            var user = await _userRepository.GetByEmail(email);
+            if (user == null || !user.IsActiveUser)
             {
                 return false;
             }
@@ -84,14 +87,17 @@ namespace Market.Services
             user.IsActiveUser = false;
             user.Password = _utilities.HashPassword(newPassword);
             await _userRepository.Update(user);
+#if !DEBUG
             await _emailSender.SendEmailAsync(user.Email, "Change password validation", $"Please validate your email by clicking <a href='https://localhost:44333/validate-email/{user.ValidationCode}'>here</a>");
-            
+#endif            
             return true;
         }
 
-        public async Task<bool> ChangePassword(int userId, string oldPassword, string newPassword)
+        public async Task<bool> ChangePassword(string userEmail, string oldPassword, string newPassword)
         {
-            var user = await _userRepository.Get(userId);
+            if (_utilities == null) _utilities = new Utilities();
+
+            var user = await _userRepository.GetByEmail(userEmail);
             if (user == null || !VerifyPassword(oldPassword, user.Password))
             {
                 return false;
@@ -127,8 +133,9 @@ namespace Market.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.UserRoles.FirstOrDefault().Role.Name)
+
             };
 
             var token = new JwtSecurityToken(
@@ -139,6 +146,21 @@ namespace Market.Services
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public bool IsValidEmail(string email)
+        {
+            return new EmailAddressAttribute().IsValid(email);
+        }
+
+        public bool IsValidPassword(string password)
+        {
+            //el password debe tener al menos 8 caracteres caracteres especiales y numeros
+            Regex hasNumber = new Regex(@"[0-9]+");
+            Regex hasMinimum8Chars = new Regex(@".{8,}");
+            Regex hasSpecialCharacter = new Regex(@"[!@#$%^&*()_+=\[{\]};:<>|./?,-]");
+
+            return hasNumber.IsMatch(password) && hasSpecialCharacter.IsMatch(password) && hasMinimum8Chars.IsMatch(password);
         }
     }
 }
