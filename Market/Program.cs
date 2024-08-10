@@ -56,6 +56,8 @@ namespace Market
 
             services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
 
+            services.AddScoped<IS3Service, S3Service>();
+            services.Configure<AWSOptions>(configuration.GetSection("AWS"));
 
             // Configuración de AutoMapper
             services.AddAutoMapper(typeof(MappingProfile));
@@ -140,6 +142,14 @@ namespace Market
         public string Username { get; set; }
         public string Password { get; set; }
         public string From { get; set; }
+    }
+
+    public class AWSOptions
+    {
+        public string AccessKey { get; set; }
+        public string SecretKey { get; set; }
+        public string BucketName { get; set; }
+        public string Region { get; set; }
     }
 
 }

@@ -16,10 +16,6 @@ namespace Market.DTOs.Product
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "Image URL is required")]
-        [Url(ErrorMessage = "Invalid URL format")]
-        public string ImageUrl { get; set; }
-
         [Required(ErrorMessage = "Subcategory ID is required")]
         public int SubcategoryId { get; set; }
     }

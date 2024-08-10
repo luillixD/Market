@@ -17,9 +17,11 @@ namespace Market.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductDto> AddAsync(CreateProductDto productDto)
+        public async Task<ProductDto> AddAsync(CreateProductDto productDto, string imageUrl)
         {
             var product = _mapper.Map<Product>(productDto);
+            product.ImageUrl = imageUrl; // Add image URL to product
+
             var addedProduct = await _repository.AddAsync(product);
             return _mapper.Map<ProductDto>(addedProduct);
         }

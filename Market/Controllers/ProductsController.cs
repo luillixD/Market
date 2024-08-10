@@ -10,27 +10,33 @@ namespace Market.Controllers
     {
         private readonly IProductService _service;
         private readonly ISubcategoryService _subcategoryService;
+        private readonly IS3Service _s3Service;
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService service, ISubcategoryService subcategoryService, ILogger<ProductsController> logger)
+        public ProductsController(IProductService service, ISubcategoryService subcategoryService, IS3Service s3Service, ILogger<ProductsController> logger)
         {
             _service = service;
             _subcategoryService = subcategoryService;
+            _s3Service = s3Service;
             _logger = logger;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(CreateProductDto productDto)
+        public async Task<IActionResult> Add([FromForm] CreateProductDto productDto, [FromForm] IFormFile file)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (file == null || file.Length == 0) return BadRequest("Image file is required.");
+
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
                 // Check if the subcategory exists
                 var subcategoryExists = await _subcategoryService.ExistsAsync(productDto.SubcategoryId);
                 if (!subcategoryExists) return NotFound(new { message = "The specified subcategory does not exist." });
-                
-                var product = await _service.AddAsync(productDto);
+
+                // Upload file to S3
+                var imageUrl = await _s3Service.UploadFileAsync(file);
+
+                var product = await _service.AddAsync(productDto, imageUrl);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
             }
             catch (Exception ex)
