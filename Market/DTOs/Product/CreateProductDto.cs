@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Market.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace Market.DTOs.Product
 {
@@ -15,6 +16,10 @@ namespace Market.DTOs.Product
         [Required(ErrorMessage = "Price is required")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero")]
         public decimal Price { get; set; }
+
+        [AllowedExtensions(new[] { ".jpg", ".jpeg" })]
+        [MaxFileSize(100 * 1024)] // 100 KB
+        public IFormFile ImageFile { get; set; }
 
         [Required(ErrorMessage = "Subcategory ID is required")]
         public int SubcategoryId { get; set; }

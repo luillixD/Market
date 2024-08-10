@@ -22,10 +22,9 @@ namespace Market.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromForm] CreateProductDto productDto, [FromForm] IFormFile file)
+        public async Task<IActionResult> Add([FromForm] CreateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (file == null || file.Length == 0) return BadRequest("Image file is required.");
 
             try
             {
@@ -34,7 +33,7 @@ namespace Market.Controllers
                 if (!subcategoryExists) return NotFound(new { message = "The specified subcategory does not exist." });
 
                 // Upload file to S3
-                var imageUrl = await _s3Service.UploadFileAsync(file);
+                var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
 
                 var product = await _service.AddAsync(productDto, imageUrl);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
