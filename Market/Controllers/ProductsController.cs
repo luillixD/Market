@@ -9,15 +9,11 @@ namespace Market.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _service;
-        private readonly ISubcategoryService _subcategoryService;
-        private readonly IS3Service _s3Service;
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService service, ISubcategoryService subcategoryService, IS3Service s3Service, ILogger<ProductsController> logger)
+        public ProductsController(IProductService service, ILogger<ProductsController> logger)
         {
             _service = service;
-            _subcategoryService = subcategoryService;
-            _s3Service = s3Service;
             _logger = logger;
         }
 
@@ -28,15 +24,12 @@ namespace Market.Controllers
 
             try
             {
-                // Check if the subcategory exists
-                var subcategoryExists = await _subcategoryService.ExistsAsync(productDto.SubcategoryId);
-                if (!subcategoryExists) return NotFound(new { message = "The specified subcategory does not exist." });
-
-                // Upload file to S3
-                var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
-
-                var product = await _service.AddAsync(productDto, imageUrl);
+                var product = await _service.AddAsync(productDto);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -45,15 +38,25 @@ namespace Market.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateProductDto productDto)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(int id, [FromForm] UpdateProductDto productDto)
         {
-            if (id != productDto.Id)
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
             {
-                return BadRequest("Product ID mismatch");
+                var updatedProduct = await _service.PatchAsync(id, productDto);
+                return Ok(updatedProduct);
             }
-            await _service.UpdateAsync(productDto);
-            return NoContent();
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product");
+                return StatusCode(500, "An error occurred while updating the product");
+            }
         }
 
         [HttpDelete("{id}")]
