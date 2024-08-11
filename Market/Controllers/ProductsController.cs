@@ -64,7 +64,7 @@ namespace Market.Controllers
         {
             try
             {
-                var result = await _service.SoftDeleteAsync(id);
+                await _service.SoftDeleteAsync(id);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -82,10 +82,8 @@ namespace Market.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _service.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            if (product == null) return NotFound();
+
             return Ok(product);
         }
 
