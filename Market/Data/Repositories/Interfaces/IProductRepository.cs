@@ -6,7 +6,6 @@ namespace Market.Data.Repositories.Interfaces
     {
         Task<Product> AddAsync(Product product);
         Task<Product> UpdateAsync(Product product);
-        Task DeleteAsync(int id);
         Task<Product> GetByIdAsync(int id);
         Task<IEnumerable<Product>> GetAllAsync();
     }

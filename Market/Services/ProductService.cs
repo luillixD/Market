@@ -67,9 +67,14 @@ namespace Market.Services
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> SoftDeleteAsync(int id)
         {
-            await _repository.DeleteAsync(id);
+            var product = await _repository.GetByIdAsync(id);
+            if (product == null) throw new ArgumentException("Product not found.");
+
+            product.IsDeleted = true;
+            await _repository.UpdateAsync(product);
+            return true;
         }
 
         public async Task<ProductDto> GetByIdAsync(int id)

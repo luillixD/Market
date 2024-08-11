@@ -6,7 +6,7 @@ namespace Market.Services.Interfaces
     {
         Task<ProductDto> AddAsync(CreateProductDto productDto);
         Task<ProductDto> PatchAsync(int id, UpdateProductDto productDto);
-        Task DeleteAsync(int id);
+        Task<bool> SoftDeleteAsync(int id);
         Task<ProductDto> GetByIdAsync(int id);
         Task<IEnumerable<ProductDto>> GetAllAsync();
     }

@@ -62,8 +62,20 @@ namespace Market.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
-            return NoContent();
+            try
+            {
+                var result = await _service.SoftDeleteAsync(id);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product");
+                return StatusCode(500, "An error occurred while deleting the product");
+            }
         }
 
         [HttpGet("{id}")]
