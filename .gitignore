@@ -28,3 +28,8 @@
 /Market/bin/Debug/net8.0/appsettings.json
 /Market/obj/Debug/net8.0/Market.AssemblyInfo.cs
 /Market/obj/Debug/net8.0/Market.csproj.CoreCompileInputs.cache
+/.vs/ProjectEvaluation/market.metadata.v8.bin
+/.vs/ProjectEvaluation/market.projects.v8.bin
+/.vs/ProjectEvaluation/market.strings.v8.bin
+*.cache
+/Market/obj/Release/net8.0
