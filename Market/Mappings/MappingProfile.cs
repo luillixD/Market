@@ -15,8 +15,7 @@ namespace Market.Mappings
                 .ForMember(dest => dest.IsActiveUser, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 
-            CreateMap<User, UserDto>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.UserRoles.FirstOrDefault().Role.Name));
+            CreateMap<User, UserDto>();
 
             CreateMap<UserDto, User>();
 
@@ -27,12 +26,13 @@ namespace Market.Mappings
                 new UserRole { RoleId = 2 } 
             }));
 
-
-            CreateMap<User, RegisterDto>();
+            CreateMap<UpdateUserDto, User>();
 
             CreateMap<CreateRoleDto, Role>();
 
             CreateMap<Role, RoleDto>();
+
+            CreateMap<RoleDto, UserRole>();
 
             CreateMap<UpdateRoleDto, Role>();
 

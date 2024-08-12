@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Market.DTOs.Users;
+using System.Security.Claims;
 
 namespace Market.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -25,6 +25,7 @@ namespace Market.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserDto>> Get(int id)
         {
             if (id <= 0) return BadRequest("Invalid id");
@@ -32,9 +33,19 @@ namespace Market.Controllers
             try
             {
                 var user = await _userService.Get(id);
+                var role = await _userService.GetUserRoles(id);
+                UserWithRoleDto userWithRoleDto = new UserWithRoleDto
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = role
+                };
+
                 if (user == null)
                     return NotFound();
-                return Ok(_mapper.Map<UserDto>(user));
+                return Ok(userWithRoleDto);
             }
             catch (Exception ex)
             {
@@ -44,11 +55,30 @@ namespace Market.Controllers
         }
 
         [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> GetUser()
+        {
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            try
+            {
+                var user = await _userService.Get(userId);
+                if (user == null)
+                    return NotFound();
+                return Ok(_mapper.Map<UserDto>(user));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting user with id {userId}");
+                return StatusCode(500, "An error occurred while retrieving the user");
+            }
+        }
+
+        [HttpGet("/all")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (page <= 0) return BadRequest("Invalid page number");
-
             try
             {
                 var users = await _userService.GetAll(page, pageSize);
@@ -61,46 +91,54 @@ namespace Market.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UserDto userDto)
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> Update([FromBody] UpdateUserDto body)
         {
-            if (id <= 0) return BadRequest("Invalid id");
-            if (userDto == null) return BadRequest("User data is required");
-            if (string.IsNullOrEmpty(userDto.FullName)) return BadRequest("Name is required");
-            if (string.IsNullOrEmpty(userDto.Email)) return BadRequest("Email is required");
-            if (string.IsNullOrEmpty(userDto.PhoneNumber)) return BadRequest("Phone Number is required");
-            if (string.IsNullOrEmpty(userDto.Password)) return BadRequest("Password is required");
-            if (string.IsNullOrEmpty(userDto.ConfirmationPassword)) return BadRequest("Confirmation Password is required");
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (body == null) return BadRequest("User data is required");
+            if (string.IsNullOrEmpty(body.FullName) && string.IsNullOrEmpty(body.Email) && string.IsNullOrEmpty(body.PhoneNumber)) return BadRequest("At least one field is required");
 
             try
             {
-                if (id != userDto.Id)
-                    return BadRequest();
-
-                if (userDto.Password != userDto.ConfirmationPassword) return BadRequest("Password and Confirmation Password do not match");
-
-                var user = _mapper.Map<User>(userDto);
-                var updatedUser = await _userService.Update(user);
+                var updatedUser = await _userService.Update(userId, body.FullName, body.Email, body.PhoneNumber);
                 if (updatedUser == null)
                     return NotFound();
-                return Ok(_mapper.Map<UserDto>(updatedUser));
+                return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating user with id {id}");
+                _logger.LogError(ex, $"Error updating user with id {userId}");
                 return StatusCode(500, "An error occurred while updating the user");
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("/Delete")]
+        [Authorize]
+        public async Task<IActionResult> Delete()
+        {
+            var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            try
+            {
+                await _userService.Delete(userId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting user with id {userId}");
+                return StatusCode(500, "An error occurred while deleting the user");
+            }
+        }
+
+        [HttpDelete("/Delete{id}")]
+        [Authorize (Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                throw new Exception("Error deleting user");
-                var result = await _userService.Delete(id);
-                if (!result)
-                    return NotFound();
+                await _userService.Delete(id);
                 return Ok();
             }
             catch (Exception ex)

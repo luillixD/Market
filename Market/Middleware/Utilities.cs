@@ -1,5 +1,6 @@
 ﻿using Market.Models;
 using Org.BouncyCastle.Asn1.Ocsp;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Policy;
 
 namespace Market.Middleware
@@ -14,6 +15,11 @@ namespace Market.Middleware
         internal string GenerateValidationCode()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        public bool IsValidEmail(string email)
+        {
+            return new EmailAddressAttribute().IsValid(email);
         }
     }
 }

@@ -30,13 +30,14 @@ namespace Market.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _emailSender = emailService ?? throw new ArgumentNullException(nameof(emailService));
-            _url = url.Value; 
+            _url = url.Value;
+            _utilities = new Utilities();
         }
 
         public async Task<User> Register(User user)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
-            if(_utilities == null) _utilities = new Utilities();
+            if (!_utilities.IsValidEmail(user.Email)) throw new InvalidOperationException("Invalid email format");
 
             if (await _userRepository.GetByEmail(user.Email) != null)
             {
@@ -76,7 +77,6 @@ namespace Market.Services
 
         public async Task<bool> ForgetPassword(string email, string newPassword)
         {
-            if (_utilities == null) _utilities = new Utilities();
             if (string.IsNullOrEmpty(newPassword)) return false;
             var user = await _userRepository.GetByEmail(email);
             if (user == null || !user.IsActiveUser)
@@ -95,8 +95,6 @@ namespace Market.Services
 
         public async Task<bool> ChangePassword(string userEmail, string oldPassword, string newPassword)
         {
-            if (_utilities == null) _utilities = new Utilities();
-
             var user = await _userRepository.GetByEmail(userEmail);
             if (user == null || !VerifyPassword(oldPassword, user.Password))
             {
@@ -106,6 +104,13 @@ namespace Market.Services
             user.Password = _utilities.HashPassword(newPassword);
             await _userRepository.Update(user);
             return true;
+        }
+
+        public async Task<bool> IsVerifiedUser(string email)
+        {
+            var user = await _userRepository.GetByEmail(email);
+            if (user == null) return false;
+            return user.IsActiveUser;
         }
 
         public async Task<bool> ValidateEmail(string codeValidation)
@@ -131,9 +136,9 @@ namespace Market.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.UserRoles.FirstOrDefault().Role.Name)
 
             };
@@ -148,19 +153,37 @@ namespace Market.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public bool IsValidEmail(string email)
-        {
-            return new EmailAddressAttribute().IsValid(email);
-        }
-
         public bool IsValidPassword(string password)
         {
-            //el password debe tener al menos 8 caracteres caracteres especiales y numeros
             Regex hasNumber = new Regex(@"[0-9]+");
             Regex hasMinimum8Chars = new Regex(@".{8,}");
             Regex hasSpecialCharacter = new Regex(@"[!@#$%^&*()_+=\[{\]};:<>|./?,-]");
 
             return hasNumber.IsMatch(password) && hasSpecialCharacter.IsMatch(password) && hasMinimum8Chars.IsMatch(password);
         }
+
+        public string RenewToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            if (jsonToken == null)
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+            var user = GetUserFromToken(jsonToken);
+
+            return GenerateJwtToken(user);
+        }
+
+        private User GetUserFromToken(JwtSecurityToken token)
+        {
+            var userId = Convert.ToInt32(token.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var user = _userRepository.Get(userId).Result;
+            if (user == null) throw new SecurityTokenException("Invalid token");
+            return user;
+        }
+
     }
 }

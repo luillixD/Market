@@ -34,14 +34,10 @@ namespace Market.Controllers
             try
             {
                 if (registerDto == null) return BadRequest("User data is required");
-                if (string.IsNullOrEmpty(registerDto.FullName)) return BadRequest("Name is required");
-                if (string.IsNullOrEmpty(registerDto.Email)) return BadRequest("Email is required");
-                if (string.IsNullOrEmpty(registerDto.PhoneNumber)) return BadRequest("Phone Number is required");
-                if (string.IsNullOrEmpty(registerDto.Password)) return BadRequest("Password is required");
-                if (string.IsNullOrEmpty(registerDto.ConfirmationPassword)) return BadRequest("Confirmation Password is required");
-
-                bool isValidEmailFormat = Convert.ToBoolean(_loginService.IsValidEmail(registerDto.Email));
-                if (!isValidEmailFormat) return BadRequest("Email is not valid");
+                if (string.IsNullOrWhiteSpace(registerDto.FullName)) return BadRequest("Name is required");
+                if (string.IsNullOrWhiteSpace(registerDto.Email)) return BadRequest("Email is required");
+                if (string.IsNullOrWhiteSpace(registerDto.PhoneNumber)) return BadRequest("Phone Number is required");
+                if (string.IsNullOrWhiteSpace(registerDto.Password)) return BadRequest("Password is required");
 
                 bool isValidPasswordFormat = Convert.ToBoolean(_loginService.IsValidPassword(registerDto.Password));
                 if (!isValidPasswordFormat) return BadRequest("The password is not valid, the password needs a minimum of 8 characters in length, a special character and a number.");
@@ -74,10 +70,13 @@ namespace Market.Controllers
             try
             {
                 if (request == null) return BadRequest("User data is required");
-                if (string.IsNullOrEmpty(request.Email)) return BadRequest("Email is required");
-                if (string.IsNullOrEmpty(request.Password)) return BadRequest("Password is required");
+                if (string.IsNullOrWhiteSpace(request.Email)) return BadRequest("Email is required");
+                if (string.IsNullOrWhiteSpace(request.Password)) return BadRequest("Password is required");
+                var isVerfied = await _loginService.IsVerifiedUser(request.Email);
+                if (!isVerfied) return Unauthorized("User not verified");
+
                 var token = await _loginService.Authenticate(request.Email, request.Password);
-                if (string.IsNullOrEmpty(token))
+                if (string.IsNullOrWhiteSpace(token))
                     return Unauthorized("Invalid email or password");
                 return Ok(new { token });
             }
@@ -95,8 +94,8 @@ namespace Market.Controllers
             try
             {
                 if (request == null) return BadRequest("User data is required");
-                if (string.IsNullOrEmpty(request.Email)) return BadRequest("Email is required");
-                if (string.IsNullOrEmpty(request.NewPassword)) return BadRequest("New password is required");
+                if (string.IsNullOrWhiteSpace(request.Email)) return BadRequest("Email is required");
+                if (string.IsNullOrWhiteSpace(request.NewPassword)) return BadRequest("New password is required");
                 bool isValidPasswordFormat = Convert.ToBoolean(_loginService.IsValidPassword(request.NewPassword));
                 if (!isValidPasswordFormat) return BadRequest("The password is not valid, the password needs a minimum of 8 characters in length, a special character and a number.");
                 var result = await _loginService.ForgetPassword(request.Email, request.NewPassword);
@@ -118,9 +117,9 @@ namespace Market.Controllers
             try
             {
                 var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userEmail)) return BadRequest("Invalid user");
-                if (string.IsNullOrEmpty(body.OldPassword)) return BadRequest("Old password is required");
-                if (string.IsNullOrEmpty(body.NewPassword)) return BadRequest("New password is required");
+                if (string.IsNullOrWhiteSpace(userEmail)) return BadRequest("Invalid user");
+                if (string.IsNullOrWhiteSpace(body.OldPassword)) return BadRequest("Old password is required");
+                if (string.IsNullOrWhiteSpace(body.NewPassword)) return BadRequest("New password is required");
                 bool isValidPasswordFormat = Convert.ToBoolean(_loginService.IsValidPassword(body.NewPassword));
                 if (!isValidPasswordFormat) return BadRequest("The password is not valid, the password needs a minimum of 8 characters in length, a special character and a number.");
 
@@ -142,6 +141,7 @@ namespace Market.Controllers
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(codeValidation)) return BadRequest("Validation code is required");
                 var result = await _loginService.ValidateEmail(codeValidation);
                 if (!result)
                     return BadRequest("Invalid validation code");

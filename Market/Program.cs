@@ -2,11 +2,13 @@ using Market.Data;
 using Market.Data.Repositories;
 using Market.Data.Repositories.Interfaces;
 using Market.Mappings;
+using Market.Middleware;
 using Market.Services;
 using Market.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.Text;
 
 namespace Market
@@ -103,21 +105,7 @@ namespace Market
                 });
             });
 
-            // Configuración de autenticación JWT
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
-                    };
-                });
+            services.ConfigureJwtAuthentication(configuration);
 
             // TODO: Considera añadir Health Checks
             // services.AddHealthChecks();
