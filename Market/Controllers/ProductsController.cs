@@ -95,11 +95,11 @@ namespace Market.Controllers
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string orderBy = null, [FromQuery] decimal? price = null)
         {
             try
             {
-                var pagedProducts = await _service.GetPagedAsync(pageNumber, pageSize);
+                var pagedProducts = await _service.GetPagedAsync(pageNumber, pageSize, orderBy, price);
                 return Ok(pagedProducts);
             }
             catch (Exception ex)

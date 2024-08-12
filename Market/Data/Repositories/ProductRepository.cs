@@ -41,13 +41,36 @@ namespace Market.Data.Repositories
                                  .ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize, string orderBy = null, decimal? price = null)
         {
-            return await _context.Products
-                                 .Where(p => !p.IsDeleted)
-                                 .Skip((pageNumber - 1) * pageSize)
-                                 .Take(pageSize)
-                                 .ToListAsync();
+            var query = _context.Products.Where(p => !p.IsDeleted);
+
+            // Filtering by price
+            if (price.HasValue)
+            {
+                query = query.Where(p => p.Price <= price.Value);
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                switch (orderBy.ToLower())
+                {
+                    case "name":
+                        query = query.OrderBy(p => p.Name);
+                        break;
+                    case "price":
+                        query = query.OrderBy(p => p.Price);
+                        break;
+                    default:
+                        query = query.OrderBy(p => p.Id); // Default sorting by ID
+                        break;
+                }
+            }
+
+            return await query.Skip((pageNumber - 1) * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync();
         }
 
     }
