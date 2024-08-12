@@ -88,5 +88,11 @@ namespace Market.Services
             var products = await _repository.GetAllAsync();
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
+
+        public async Task<IEnumerable<ProductDto>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            var products = await _repository.GetPagedAsync(pageNumber, pageSize);
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
+        }
     }
 }

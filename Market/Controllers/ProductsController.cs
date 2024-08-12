@@ -93,5 +93,21 @@ namespace Market.Controllers
             var products = await _service.GetAllAsync();
             return Ok(products);
         }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var pagedProducts = await _service.GetPagedAsync(pageNumber, pageSize);
+                return Ok(pagedProducts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paginated products");
+                return StatusCode(500, "An error occurred while retrieving products");
+            }
+        }
+
     }
 }

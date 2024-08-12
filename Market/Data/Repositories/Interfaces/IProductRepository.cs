@@ -8,5 +8,6 @@ namespace Market.Data.Repositories.Interfaces
         Task<Product> UpdateAsync(Product product);
         Task<Product> GetByIdAsync(int id);
         Task<IEnumerable<Product>> GetAllAsync();
+        Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize);
     }
 }

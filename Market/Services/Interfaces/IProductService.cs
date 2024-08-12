@@ -9,5 +9,6 @@ namespace Market.Services.Interfaces
         Task<bool> SoftDeleteAsync(int id);
         Task<ProductDto> GetByIdAsync(int id);
         Task<IEnumerable<ProductDto>> GetAllAsync();
+        Task<IEnumerable<ProductDto>> GetPagedAsync(int pageNumber, int pageSize);
     }
 }

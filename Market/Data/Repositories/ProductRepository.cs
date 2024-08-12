@@ -40,5 +40,15 @@ namespace Market.Data.Repositories
                                  .Where(p => !p.IsDeleted)
                                  .ToListAsync();
         }
+
+        public async Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize)
+        {
+            return await _context.Products
+                                 .Where(p => !p.IsDeleted)
+                                 .Skip((pageNumber - 1) * pageSize)
+                                 .Take(pageSize)
+                                 .ToListAsync();
+        }
+
     }
 }
