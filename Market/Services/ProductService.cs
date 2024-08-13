@@ -28,7 +28,11 @@ namespace Market.Services
             if (!subcategoryExists) throw new ArgumentException("The specified subcategory does not exist.");
 
             // Upload file to S3
-            var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
+            #if DEBUG
+                var imageUrl = "https://s3-shopping-world.s3.amazonaws.com/image.jpg";
+            #else
+                var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
+            #endif
 
             // Map and add product
             var product = _mapper.Map<Product>(productDto);
@@ -59,7 +63,11 @@ namespace Market.Services
             // Check and update if there's a new image file
             if (productDto.ImageFile != null)
             {
-                var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
+                #if DEBUG
+                    var imageUrl = "https://s3-shopping-world.s3.amazonaws.com/image.jpg";
+                #else
+                    var imageUrl = await _s3Service.UploadFileAsync(productDto.ImageFile);
+                #endif
                 product.ImageUrl = imageUrl;  // Update the image URL
             }
 
