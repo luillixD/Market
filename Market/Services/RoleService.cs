@@ -1,6 +1,7 @@
 ﻿using Market.Data.Repositories.Interfaces;
 using Market.Models;
 using Market.Services.Interfaces;
+using System.Data;
 
 namespace Market.Services
 {
@@ -49,20 +50,22 @@ namespace Market.Services
             {
                 throw new InvalidOperationException($"Role with id '{role.Id}' does not exist");
             }
+            existingRole.Name = role.Name;
 
-            var updatedRole = await _roleRepository.Update(role);
+            var updatedRole = await _roleRepository.Update(existingRole);
             _logger.LogInformation($"Role updated: {updatedRole.Id}");
             return updatedRole;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
-            var result = await _roleRepository.Delete(id);
-            if (result)
+            var existingRole = await _roleRepository.GetById(id);
+            if (existingRole == null)
             {
-                _logger.LogInformation($"Role deleted: {id}");
+                throw new InvalidOperationException($"Role with id '{id}' does not exist");
             }
-            return result;
+            existingRole.IsActiveRole = false;
+            await _roleRepository.Delete(existingRole);
         }
     }
 }

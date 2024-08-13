@@ -2,11 +2,13 @@ using Market.Data;
 using Market.Data.Repositories;
 using Market.Data.Repositories.Interfaces;
 using Market.Mappings;
+using Market.Middleware;
 using Market.Services;
 using Market.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.Text;
 
 namespace Market
@@ -20,6 +22,39 @@ namespace Market
             ConfigureServices(builder.Services, builder.Configuration);
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+
+                    logger.LogInformation("Checking database...");
+
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        logger.LogInformation("Applying pending migrations...");
+                        context.Database.Migrate();
+                        logger.LogInformation("Migrations applied successfully.");
+                    }
+                    else
+                    {
+                        logger.LogInformation("Database is up to date. No migrations needed.");
+                    }
+
+                    // Aquí puedes añadir lógica para sembrar datos iniciales si es necesario
+                    DatabaseSeeder.SeedData(services);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating or initializing the database.");
+                    throw; // Re-lanza la excepción para asegurar que la aplicación no se inicie con una base de datos en mal estado
+                }
+            }
+
 
             ConfigureApp(app);
 
@@ -56,6 +91,7 @@ namespace Market
 
             services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
 
+            services.Configure<Urls>(configuration.GetSection("URLs"));
             services.AddScoped<IS3Service, S3Service>();
             services.Configure<AWSOptions>(configuration.GetSection("AWS"));
 
@@ -77,21 +113,7 @@ namespace Market
                 });
             });
 
-            // Configuración de autenticación JWT
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
-                    };
-                });
+            services.ConfigureJwtAuthentication(configuration);
 
             // TODO: Considera añadir Health Checks
             // services.AddHealthChecks();
@@ -133,6 +155,12 @@ namespace Market
             // TODO: Considera añadir el endpoint de Health Checks
             // app.MapHealthChecks("/health");
         }
+    }
+
+    public class Urls
+    {
+        public string UI { get; set; }
+        public string LN { get; set; }
     }
 
     public class SmtpSettings

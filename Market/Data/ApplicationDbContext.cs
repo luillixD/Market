@@ -26,11 +26,7 @@ namespace Market.Data
             {
                 entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.LastName)
+                entity.Property(e => e.FullName)
                     .IsRequired()
                     .HasMaxLength(50);
 
@@ -49,12 +45,13 @@ namespace Market.Data
 
                 entity.Property(e => e.CreatedAt);
 
-                entity.Property(e => e.IsEmailValidated)
+                entity.Property(e => e.IsActiveUser)
                     .IsRequired()
                     .HasDefaultValue(false);
 
                 entity.Property(e => e.ValidationCode)
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Role>(entity =>

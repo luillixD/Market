@@ -1,4 +1,5 @@
 ﻿using Market.Data.Repositories.Interfaces;
+using Market.DTOs.Roles;
 using Market.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,17 +32,10 @@ namespace Market.Data.Repositories
             return user;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(User user)
         {
-            var response = 0;
-            var user = await Get(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-                response = await _context.SaveChangesAsync();
-            }
-            if(response > 0) return true;
-            return false;
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<User> Get(int id)
@@ -77,12 +71,15 @@ namespace Market.Data.Repositories
             return changesCount > 0;
         }
 
-        public async Task<IEnumerable<string>> GetUserRoles(int userId)
+        public async Task<RoleDto> GetUserRoles(int userId)
         {
             return await _context.UserRoles
                 .Where(ur => ur.UserId == userId)
-                .Select(ur => ur.Role.Name)
-                .ToListAsync();
+                .Select(ur => new RoleDto
+                {
+                    Id = ur.RoleId,
+                    Name = ur.Role.Name
+                }).FirstAsync();
         }
 
         public async Task<User> GetByEmail(string email)
@@ -98,6 +95,7 @@ namespace Market.Data.Repositories
             return await _context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
+                .Where(u => u.IsActiveUser)
                 .OrderBy(u => u.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

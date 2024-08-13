@@ -9,7 +9,7 @@ namespace Market.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize(Roles = "Admin")] // Asume que solo los administradores pueden manejar roles
+    [Authorize(Roles = "Admin")]
     public class RoleController : ControllerBase
     {
         private readonly IRoleService _roleService;
@@ -26,6 +26,7 @@ namespace Market.Controllers
         [HttpPost]
         public async Task<ActionResult<RoleDto>> Create([FromBody] CreateRoleDto createRoleDto)
         {
+            if (string.IsNullOrWhiteSpace(createRoleDto.Name)) return BadRequest("Name is required");
             try
             {
                 var role = _mapper.Map<Role>(createRoleDto);
@@ -48,6 +49,7 @@ namespace Market.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RoleDto>> Get(int id)
         {
+            if (id <= 0) return BadRequest("Is not valid rol");
             try
             {
                 var role = await _roleService.GetById(id);
@@ -80,12 +82,13 @@ namespace Market.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateRoleDto updateRoleDto)
         {
+            if (id <= 0) return BadRequest("Is not valid rol");
+            if (string.IsNullOrWhiteSpace(updateRoleDto.Name)) return BadRequest("Name is required");
+
             try
             {
-                if (id != updateRoleDto.Id)
-                    return BadRequest();
-
                 var role = _mapper.Map<Role>(updateRoleDto);
+                role.Id = id;
                 var updatedRole = await _roleService.Update(role);
                 if (updatedRole == null)
                     return NotFound();
@@ -101,11 +104,10 @@ namespace Market.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            if (id <= 0) return BadRequest("Is not valid rol");
             try
             {
-                var result = await _roleService.Delete(id);
-                if (!result)
-                    return NotFound();
+                await _roleService.Delete(id);
                 return Ok();
             }
             catch (Exception ex)

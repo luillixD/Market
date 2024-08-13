@@ -2,10 +2,8 @@
 
 namespace Market.DTOs.Login
 {
-    public class ChangePassworDto
+    public class ChangePasswordDto
     {
-        [EmailAddress]
-        public string email { get; set; }
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
     }

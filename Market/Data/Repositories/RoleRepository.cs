@@ -1,6 +1,7 @@
 ﻿using Market.Data.Repositories.Interfaces;
 using Market.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Market.Data.Repositories
 {
@@ -25,7 +26,7 @@ namespace Market.Data.Repositories
 
         public async Task<IEnumerable<Role>> GetAll()
         {
-            return await _context.Roles.ToListAsync();
+            return await _context.Roles.Where(r => r.IsActiveRole).ToListAsync();
         }
 
         public async Task<Role> Create(Role role)
@@ -42,15 +43,10 @@ namespace Market.Data.Repositories
             return role;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(Role role)
         {
-            var role = await GetById(id);
-            if (role == null)
-                return false;
-
-            _context.Roles.Remove(role);
+            _context.Entry(role).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            return true;
         }
     }
 }

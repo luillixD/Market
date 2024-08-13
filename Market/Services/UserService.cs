@@ -1,9 +1,11 @@
 ﻿using Market.Data.Repositories.Interfaces;
+using Market.DTOs.Roles;
 using Market.Middleware;
 using Market.Models;
 using Market.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -24,54 +26,17 @@ namespace Market.Services
             _roleRepository = roleRepository ?? throw new ArgumentNullException(nameof(roleRepository));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _utilities = new Utilities();
         }
 
-        public async Task<User> Create(User user, string roleName)
+        public async Task<User> Update(int id, string fullName, string email, string phoneNumber)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (string.IsNullOrWhiteSpace(roleName)) throw new ArgumentException("Role name cannot be empty", nameof(roleName));
-
-            if (await _userRepository.GetByEmail(user.Email) != null)
-            {
-                throw new InvalidOperationException("Email already exists");
-            }
-            if (_utilities == null) _utilities = new Utilities();
-
-            user.Password = HashPassword(user.Password);
-            user.ValidationCode = _utilities.GenerateValidationCode();
-
-            var role = await _roleRepository.GetByName(roleName);
-            if (role == null)
-            {
-                throw new InvalidOperationException($"Role '{roleName}' does not exist");
-            }
-
-            user.UserRoles = new List<UserRole> { new UserRole { RoleId = role.Id } };
-
-            var createdUser = await _userRepository.Create(user);
-
-            SendValidationEmail(createdUser);
-
-            _logger.LogInformation($"User created with role {roleName}: {createdUser.Id}");
-            return createdUser;
-        }
-
-        internal void SendValidationEmail(User user)
-        {
-            // Send email with validation code
-
-            
-        }
-
-        public async Task<User> Update(User user)
-        {
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            var user = await _userRepository.Get(id);
+            if(!string.IsNullOrEmpty(fullName)) user.FullName = fullName;
+            if(!string.IsNullOrEmpty(email)) user.Email = email;
+            if(!string.IsNullOrEmpty(phoneNumber)) user.PhoneNumber = phoneNumber;
+            if (!_utilities.IsValidEmail(user.Email)) throw new InvalidOperationException("Invalid email format");
             return await _userRepository.Update(user);
-        }
-
-        public async Task<bool> Delete(int id)
-        {
-            return await _userRepository.Delete(id);
         }
 
         public async Task<User> Get(int id)
@@ -84,19 +49,17 @@ namespace Market.Services
             return await _userRepository.GetAll(page, pageSize);
         }
 
-        public async Task<bool> Exists(int id)
-        {
-            return await _userRepository.Exists(id);
-        }
-
-        public async Task<IEnumerable<string>> GetUserRoles(int userId)
+        public async Task<RoleDto> GetUserRoles(int userId)
         {
             return await _userRepository.GetUserRoles(userId);
         }
 
-        private string HashPassword(string password)
+        public async Task Delete(int userId)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            var user = await _userRepository.Get(userId);
+            if (user == null) throw new InvalidOperationException("User not found");
+            user.IsActiveUser = false;
+            await _userRepository.Delete(user);
         }
     }
 }
