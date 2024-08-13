@@ -21,7 +21,7 @@ namespace Market.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductDto> AddAsync(CreateProductDto productDto)
+        public async Task<ProductDto> Create(CreateProductDto productDto)
         {
             // Check if the subcategory exists
             var subcategoryExists = await _subcategoryService.ExistsAsync(productDto.SubcategoryId);
@@ -34,13 +34,13 @@ namespace Market.Services
             var product = _mapper.Map<Product>(productDto);
             product.ImageUrl = imageUrl; // Add image URL to product
 
-            var addedProduct = await _repository.AddAsync(product);
+            var addedProduct = await _repository.Create(product);
             return _mapper.Map<ProductDto>(addedProduct);
         }
 
-        public async Task<ProductDto> PatchAsync(int id, UpdateProductDto productDto)
+        public async Task<ProductDto> Update(int id, UpdateProductDto productDto)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = await _repository.GetById(id);
             if (product == null) throw new ArgumentException("Product not found.");
 
             // Update properties if provided
@@ -63,35 +63,35 @@ namespace Market.Services
                 product.ImageUrl = imageUrl;  // Update the image URL
             }
 
-            var updatedProduct = await _repository.UpdateAsync(product);
+            var updatedProduct = await _repository.Update(product);
             return _mapper.Map<ProductDto>(updatedProduct);
         }
 
-        public async Task<bool> SoftDeleteAsync(int id)
+        public async Task<bool> Delete(int id)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = await _repository.GetById(id);
             if (product == null) throw new ArgumentException("Product not found.");
 
             product.IsDeleted = true;
-            await _repository.UpdateAsync(product);
+            await _repository.Update(product);
             return true;
         }
 
-        public async Task<ProductDto> GetByIdAsync(int id)
+        public async Task<ProductDto> GetById(int id)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = await _repository.GetById(id);
             return _mapper.Map<ProductDto>(product);
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllAsync()
+        public async Task<IEnumerable<ProductDto>> GetAll()
         {
-            var products = await _repository.GetAllAsync();
+            var products = await _repository.GetAll();
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
 
-        public async Task<IEnumerable<ProductDto>> GetPagedAsync(int pageNumber, int pageSize, string orderBy = null, decimal? price = null)
+        public async Task<IEnumerable<ProductDto>> GetPaged(int pageNumber, int pageSize, string orderBy = null, decimal? price = null)
         {
-            var products = await _repository.GetPagedAsync(pageNumber, pageSize, orderBy, price);
+            var products = await _repository.GetPaged(pageNumber, pageSize, orderBy, price);
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
     }
