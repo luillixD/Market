@@ -13,11 +13,36 @@ namespace Market.Data.Repositories
             _context = context;
         }
 
-        public async Task<Subcategory> GetByIdAsync(int id)
+        public async Task<Subcategory> Create(Subcategory subcategory)
         {
-            return await _context.Subcategories.FindAsync(id);
+            _context.Subcategories.Add(subcategory);
+            await _context.SaveChangesAsync();
+            return subcategory;
         }
-        public async Task<bool> ExistsAsync(int subcategoryId)
+
+        public async Task<Subcategory> Update(Subcategory subcategory)
+        {
+            _context.Subcategories.Update(subcategory);
+            await _context.SaveChangesAsync();
+            return subcategory;
+        }
+
+        public async Task<Subcategory> GetById(int id)
+        {
+            return await _context.Subcategories
+                                 .Include(s => s.Products)
+                                 .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+        }
+
+        public async Task<IEnumerable<Subcategory>> GetAll()
+        {
+            return await _context.Subcategories
+                                 .Include(s => s.Products)
+                                 .Where(s => !s.IsDeleted)
+                                 .ToListAsync();
+        }
+
+        public async Task<bool> Exists(int subcategoryId)
         {
             return await _context.Subcategories.AnyAsync(sc => sc.Id == subcategoryId);
         }

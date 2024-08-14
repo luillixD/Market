@@ -73,6 +73,24 @@ namespace Market.Data
                     .HasForeignKey(ur => ur.RoleId);
             });
 
+            // Configure Subcategory entity
+            modelBuilder.Entity<Subcategory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasOne(s => s.Category)
+                    .WithMany(c => c.Subcategories)
+                    .HasForeignKey(s => s.CategoryId);
+
+                entity.HasMany(s => s.Products)
+                    .WithOne(p => p.Subcategory)
+                    .HasForeignKey(p => p.SubcategoryId);
+            });
+
         }
     }
 }
