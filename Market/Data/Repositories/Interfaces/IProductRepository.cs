@@ -4,10 +4,10 @@ namespace Market.Data.Repositories.Interfaces
 {
     public interface IProductRepository
     {
-        Task<Product> AddAsync(Product product);
-        Task<Product> UpdateAsync(Product product);
-        Task<Product> GetByIdAsync(int id);
-        Task<IEnumerable<Product>> GetAllAsync();
-        Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize, string orderBy, decimal? price);
+        Task<Product> Create(Product product);
+        Task<Product> Update(Product product);
+        Task<Product> GetById(int id);
+        Task<IEnumerable<Product>> GetAll();
+        Task<IEnumerable<Product>> GetPaged(int pageNumber, int pageSize, string orderBy, decimal? price);
     }
 }

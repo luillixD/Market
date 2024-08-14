@@ -17,6 +17,7 @@ namespace Market.DTOs.Product
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero")]
         public decimal Price { get; set; }
 
+        [Required(ErrorMessage = "Image File is required")]
         [AllowedExtensions(new[] { ".jpg", ".jpeg" })]
         [MaxFileSize(100 * 1024)] // 100 KB
         public IFormFile ImageFile { get; set; }

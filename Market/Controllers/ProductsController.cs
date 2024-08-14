@@ -18,13 +18,13 @@ namespace Market.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromForm] CreateProductDto productDto)
+        public async Task<IActionResult> Create([FromForm] CreateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var product = await _service.AddAsync(productDto);
+                var product = await _service.Create(productDto);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
             }
             catch (ArgumentException ex)
@@ -39,13 +39,13 @@ namespace Market.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> Patch(int id, [FromForm] UpdateProductDto productDto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var updatedProduct = await _service.PatchAsync(id, productDto);
+                var updatedProduct = await _service.Update(id, productDto);
                 return Ok(updatedProduct);
             }
             catch (ArgumentException ex)
@@ -64,7 +64,7 @@ namespace Market.Controllers
         {
             try
             {
-                await _service.SoftDeleteAsync(id);
+                await _service.Delete(id);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -81,7 +81,7 @@ namespace Market.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var product = await _service.GetByIdAsync(id);
+            var product = await _service.GetById(id);
             if (product == null) return NotFound();
 
             return Ok(product);
@@ -90,16 +90,16 @@ namespace Market.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var products = await _service.GetAllAsync();
+            var products = await _service.GetAll();
             return Ok(products);
         }
 
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string orderBy = null, [FromQuery] decimal? price = null)
+        public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string orderBy = null, [FromQuery] decimal? price = null)
         {
             try
             {
-                var pagedProducts = await _service.GetPagedAsync(pageNumber, pageSize, orderBy, price);
+                var pagedProducts = await _service.GetPaged(pageNumber, pageSize, orderBy, price);
                 return Ok(pagedProducts);
             }
             catch (Exception ex)

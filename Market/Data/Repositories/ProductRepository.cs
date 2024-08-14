@@ -13,35 +13,35 @@ namespace Market.Data.Repositories
             _context = context;
         }
 
-        public async Task<Product> AddAsync(Product product)
+        public async Task<Product> Create(Product product)
         {
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
             return product;
         }
 
-        public async Task<Product> UpdateAsync(Product product)
+        public async Task<Product> Update(Product product)
         {
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
             return product;
         }
 
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<Product> GetById(int id)
         {
             return await _context.Products
                                  .Where(p => p.Id == id && !p.IsDeleted)
                                  .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<IEnumerable<Product>> GetAll()
         {
             return await _context.Products
                                  .Where(p => !p.IsDeleted)
                                  .ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetPagedAsync(int pageNumber, int pageSize, string orderBy = null, decimal? price = null)
+        public async Task<IEnumerable<Product>> GetPaged(int pageNumber, int pageSize, string orderBy = null, decimal? price = null)
         {
             var query = _context.Products.Where(p => !p.IsDeleted);
 
