@@ -22,6 +22,7 @@ namespace Market.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -54,12 +55,14 @@ namespace Market.Data
                     .IsRequired(false);
             });
 
+            // Configure Role entity
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
             });
 
+            // Configure UserRole entity
             modelBuilder.Entity<UserRole>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.RoleId });
@@ -71,6 +74,34 @@ namespace Market.Data
                 entity.HasOne(ur => ur.Role)
                     .WithMany(r => r.UserRoles)
                     .HasForeignKey(ur => ur.RoleId);
+            });
+
+            // Configure Product entity
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.ImageUrl)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.IsDeleted)
+                    .HasDefaultValue(false);
+
+                entity.HasOne(p => p.Subcategory)
+                    .WithMany(s => s.Products)
+                    .HasForeignKey(p => p.SubcategoryId);
             });
 
         }
