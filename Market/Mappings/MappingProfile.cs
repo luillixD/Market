@@ -42,7 +42,10 @@ namespace Market.Mappings
             CreateMap<Product, ProductDto>().ReverseMap();
             CreateMap<Product, CreateProductDto>().ReverseMap();
             CreateMap<Product, UpdateProductDto>().ReverseMap();
-            CreateMap<Subcategory, SubcategoryDto>().ReverseMap();
+
+            CreateMap<CreateSubcategoryDto, Subcategory>();
+            CreateMap<UpdateSubcategoryDto, Subcategory>();
+            CreateMap<Subcategory, SubcategoryDto>();
 
             CreateMap<CreateCategoryDto, Category>()
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
