@@ -10,7 +10,6 @@ namespace Market.Services.Interfaces
         Task<bool> ChangePassword(string email, string oldPassword, string newPassword);
         Task<bool> IsVerifiedUser(string codeValidation);
         Task<bool> ValidateEmail(string codeValidation);
-        bool IsValidPassword(string password);
 
     }
 }
