@@ -4,11 +4,11 @@ namespace Market.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<ProductDto> AddAsync(CreateProductDto productDto);
-        Task<ProductDto> PatchAsync(int id, UpdateProductDto productDto);
-        Task<bool> SoftDeleteAsync(int id);
-        Task<ProductDto> GetByIdAsync(int id);
-        Task<IEnumerable<ProductDto>> GetAllAsync();
-        Task<IEnumerable<ProductDto>> GetPagedAsync(int pageNumber, int pageSize, string orderBy, decimal? price);
+        Task<ProductDto> Create(CreateProductDto productDto);
+        Task<ProductDto> Update(int id, UpdateProductDto productDto);
+        Task<bool> Delete(int id);
+        Task<ProductDto> GetById(int id);
+        Task<IEnumerable<ProductDto>> GetAll();
+        Task<IEnumerable<ProductDto>> GetPaged(int pageNumber, int pageSize, string orderBy, decimal? price);
     }
 }

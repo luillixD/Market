@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Market.DTOs.Category;
 using Market.DTOs.Login;
 using Market.DTOs.Product;
 using Market.DTOs.Roles;
@@ -45,6 +46,13 @@ namespace Market.Mappings
             CreateMap<CreateSubcategoryDto, Subcategory>();
             CreateMap<UpdateSubcategoryDto, Subcategory>();
             CreateMap<Subcategory, SubcategoryDto>();
+
+            CreateMap<CreateCategoryDto, Category>()
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.Subcategories, opt => opt.Ignore());
+            CreateMap<UpdateCategoryDto, Category>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+            CreateMap<Category, CategoryDto>();
 
         }
     }

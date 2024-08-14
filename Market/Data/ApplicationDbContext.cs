@@ -22,6 +22,7 @@ namespace Market.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -54,12 +55,14 @@ namespace Market.Data
                     .IsRequired(false);
             });
 
+            // Configure Role entity
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
             });
 
+            // Configure UserRole entity
             modelBuilder.Entity<UserRole>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.RoleId });
@@ -73,8 +76,8 @@ namespace Market.Data
                     .HasForeignKey(ur => ur.RoleId);
             });
 
-            // Configure Subcategory entity
-            modelBuilder.Entity<Subcategory>(entity =>
+            // Configure Product entity
+            modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
 
@@ -82,10 +85,47 @@ namespace Market.Data
                     .IsRequired()
                     .HasMaxLength(100);
 
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Price)
+                    .IsRequired()
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.ImageUrl)
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.IsDeleted)
+                    .HasDefaultValue(false);
+
+                entity.HasOne(p => p.Subcategory)
+                    .WithMany(s => s.Products)
+                    .HasForeignKey(p => p.SubcategoryId);
+            });
+
+            // Configure Category entity
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+                entity.HasMany(c => c.Subcategories)
+                    .WithOne(s => s.Category)
+                    .HasForeignKey(s => s.CategoryId);
+            });
+
+            // Configure Subcategory entity
+            modelBuilder.Entity<Subcategory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
                 entity.HasOne(s => s.Category)
                     .WithMany(c => c.Subcategories)
                     .HasForeignKey(s => s.CategoryId);
-
                 entity.HasMany(s => s.Products)
                     .WithOne(p => p.Subcategory)
                     .HasForeignKey(p => p.SubcategoryId);
