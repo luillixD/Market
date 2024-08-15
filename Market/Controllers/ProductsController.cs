@@ -1,4 +1,5 @@
 ﻿using Market.DTOs.Product;
+using Market.Services;
 using Market.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -107,6 +108,32 @@ namespace Market.Controllers
                 _logger.LogError(ex, "Error retrieving paginated products");
                 return StatusCode(500, "An error occurred while retrieving products");
             }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(string searchText)
+        {
+            try
+            {
+                var products = await _service.SearchProducts(searchText);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching for products");
+                return StatusCode(500, "An error occurred while searching for products");
+            }
+        }
+
+        [HttpGet("subcategory/{subcategoryId}")]
+        public async Task<IActionResult> GetBySubcategory(int subcategoryId)
+        {
+            var products = await _service.GetBySubcategoryAsync(subcategoryId);
+            if (products == null || !products.Any())
+            {
+                return NotFound("No products found for the specified subcategory.");
+            }
+            return Ok(products);
         }
 
     }
