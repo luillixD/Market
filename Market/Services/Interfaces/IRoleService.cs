@@ -7,8 +7,5 @@ namespace Market.Services.Interfaces
         Task<Role> GetById(int id);
         Task<Role> GetByName(string name);
         Task<IEnumerable<Role>> GetAll();
-        Task<Role> Create(Role role);
-        Task<Role> Update(Role role);
-        Task Delete(int id);
     }
 }

@@ -28,25 +28,5 @@ namespace Market.Data.Repositories
         {
             return await _context.Roles.Where(r => r.IsActiveRole).ToListAsync();
         }
-
-        public async Task<Role> Create(Role role)
-        {
-            _context.Roles.Add(role);
-            await _context.SaveChangesAsync();
-            return role;
-        }
-
-        public async Task<Role> Update(Role role)
-        {
-            _context.Entry(role).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return role;
-        }
-
-        public async Task Delete(Role role)
-        {
-            _context.Entry(role).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-        }
     }
 }

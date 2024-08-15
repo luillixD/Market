@@ -153,15 +153,6 @@ namespace Market.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public bool IsValidPassword(string password)
-        {
-            Regex hasNumber = new Regex(@"[0-9]+");
-            Regex hasMinimum8Chars = new Regex(@".{8,}");
-            Regex hasSpecialCharacter = new Regex(@"[!@#$%^&*()_+=\[{\]};:<>|./?,-]");
-
-            return hasNumber.IsMatch(password) && hasSpecialCharacter.IsMatch(password) && hasMinimum8Chars.IsMatch(password);
-        }
-
         public string RenewToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();

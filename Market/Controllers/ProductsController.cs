@@ -1,5 +1,6 @@
 ﻿using Market.DTOs.Product;
 using Market.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Market.Controllers
@@ -18,6 +19,7 @@ namespace Market.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] CreateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -39,6 +41,7 @@ namespace Market.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -60,6 +63,7 @@ namespace Market.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -79,6 +83,7 @@ namespace Market.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _service.GetById(id);
@@ -88,6 +93,7 @@ namespace Market.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var products = await _service.GetAll();
@@ -95,6 +101,7 @@ namespace Market.Controllers
         }
 
         [HttpGet("paged")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string orderBy = null, [FromQuery] decimal? price = null)
         {
             try
