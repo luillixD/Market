@@ -61,5 +61,10 @@ namespace Market.Services
             user.IsActiveUser = false;
             await _userRepository.Delete(user);
         }
+
+        public async Task<bool> Exists(int userId)
+        {
+            return await _userRepository.Exists(userId);
+        }
     }
 }

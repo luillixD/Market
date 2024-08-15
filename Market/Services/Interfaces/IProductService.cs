@@ -10,5 +10,6 @@ namespace Market.Services.Interfaces
         Task<ProductDto> GetById(int id);
         Task<IEnumerable<ProductDto>> GetAll();
         Task<IEnumerable<ProductDto>> GetPaged(int pageNumber, int pageSize, string orderBy, decimal? price);
+        Task<bool> Exists(int productId);
     }
 }

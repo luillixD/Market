@@ -10,5 +10,6 @@
         public bool IsDeleted { get; set; } = false;
         public int SubcategoryId { get; set; }
         public Subcategory Subcategory { get; set; }
+        public ICollection<Review> Reviews { get; set; }
     }
 }

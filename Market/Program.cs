@@ -92,6 +92,9 @@ namespace Market
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
 
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+
             services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
 
             services.Configure<Urls>(configuration.GetSection("URLs"));

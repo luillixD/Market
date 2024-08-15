@@ -102,5 +102,10 @@ namespace Market.Services
             var products = await _repository.GetPaged(pageNumber, pageSize, orderBy, price);
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
+
+        public async Task<bool> Exists(int productId)
+        {
+            return await _repository.Exists(productId);
+        }
     }
 }

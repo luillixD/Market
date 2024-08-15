@@ -17,6 +17,7 @@ namespace Market.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Subcategory> Subcategories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -129,6 +130,33 @@ namespace Market.Data
                 entity.HasMany(s => s.Products)
                     .WithOne(p => p.Subcategory)
                     .HasForeignKey(p => p.SubcategoryId);
+            });
+
+            // Configure Review entity
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Comment)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Rating)
+                    .IsRequired();
+
+                entity.Property(e => e.IsApproved)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .IsRequired();
+
+                entity.HasOne(r => r.Product)
+                    .WithMany(p => p.Reviews)
+                    .HasForeignKey(r => r.ProductId);
+
+                entity.HasOne(r => r.User)
+                    .WithMany(u => u.Reviews)
+                    .HasForeignKey(r => r.UserId);
             });
 
         }

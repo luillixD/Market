@@ -9,5 +9,6 @@ namespace Market.Data.Repositories.Interfaces
         Task<Product> GetById(int id);
         Task<IEnumerable<Product>> GetAll();
         Task<IEnumerable<Product>> GetPaged(int pageNumber, int pageSize, string orderBy, decimal? price);
+        Task<bool> Exists(int productId);
     }
 }
