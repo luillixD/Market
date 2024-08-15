@@ -33,6 +33,7 @@ namespace Market.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var user = _mapper.Map<User>(registerDto);
                 var createdUser = await _loginService.Register(user);
 
@@ -60,6 +61,7 @@ namespace Market.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var isVerfied = await _loginService.IsVerifiedUser(request.Email);
                 if (!isVerfied) return Unauthorized("User not verified");
 
@@ -81,6 +83,7 @@ namespace Market.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var result = await _loginService.ForgetPassword(request.Email, request.NewPassword);
                 if (!result)
                     return BadRequest("Error updating password");
@@ -99,6 +102,7 @@ namespace Market.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var userEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrWhiteSpace(userEmail)) return BadRequest("Invalid token");
 
