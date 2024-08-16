@@ -1,6 +1,8 @@
-﻿using Market.Models;
+﻿using Market.DTOs.Product;
+using Market.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using static Mysqlx.Crud.Order.Types;
 
 namespace Market.Data
 {
@@ -17,6 +19,10 @@ namespace Market.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Subcategory> Subcategories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Purchase> Purchase { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<PurchaseProducts> PurchaseProducts { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -129,6 +135,39 @@ namespace Market.Data
                 entity.HasMany(s => s.Products)
                     .WithOne(p => p.Subcategory)
                     .HasForeignKey(p => p.SubcategoryId);
+            });
+
+            modelBuilder.Entity<Purchase>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SubTotal)
+                    .IsRequired();
+                entity.Property(e => e.Total)
+                    .IsRequired();
+                entity.Property(e => e.Status)
+                    .IsRequired();
+                entity.Property(e => e.DeliveryType)
+                    .IsRequired();
+                entity.HasOne(p => p.Address)
+                    .WithOne(a => a.Purchase)
+                    .HasForeignKey<Purchase>(p => p.AddressId)
+                    .IsRequired(false);
+            });
+
+            modelBuilder.Entity<PurchaseProducts>(entity =>
+            {
+                // Definir clave compuesta
+                entity.HasKey(e => new { e.PurchaseId, e.ProductId });
+
+                // Relación con Purchase (muchos a uno)
+                entity.HasOne(pp => pp.Purchase)
+                    .WithMany(p => p.PurchaseProducts)
+                    .HasForeignKey(pp => pp.PurchaseId);
+
+                // Relación con Product (muchos a uno)
+                entity.HasOne(pp => pp.Product)
+                    .WithMany(p => p.PurchaseProducts)
+                    .HasForeignKey(pp => pp.ProductId);
             });
 
         }

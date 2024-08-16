@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Market.DTOs.Bill;
 using Market.DTOs.Category;
 using Market.DTOs.Login;
 using Market.DTOs.Product;
@@ -39,7 +40,9 @@ namespace Market.Mappings
 
             CreateMap<UpdateRoleDto, Role>();
 
-            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.Subcategory.Name))
+                .ReverseMap();
             CreateMap<Product, CreateProductDto>().ReverseMap();
             CreateMap<Product, UpdateProductDto>().ReverseMap();
 
@@ -54,6 +57,10 @@ namespace Market.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<Category, CategoryDto>();
 
+            CreateMap<CreatePurchaseDto, Purchase>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1))
+                .ForMember(dest => dest.SubTotal, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.Total, opt => opt.MapFrom(src => 0));
         }
     }
 }
