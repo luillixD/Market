@@ -102,5 +102,17 @@ namespace Market.Services
             var products = await _repository.GetPaged(pageNumber, pageSize, orderBy, price);
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
+
+        public async Task<IEnumerable<ProductDto>> SearchProducts(string searchText)
+        {
+            var products = await _repository.SearchProducts(searchText);
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetBySubcategoryAsync(int subcategoryId)
+        {
+            var products = await _repository.GetBySubcategoryAsync(subcategoryId);
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
+        }
     }
 }
