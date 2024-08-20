@@ -1,5 +1,7 @@
 ﻿using Market.DTOs.Product;
+using Market.Services;
 using Market.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Market.Controllers
@@ -18,6 +20,7 @@ namespace Market.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] CreateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -39,6 +42,7 @@ namespace Market.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateProductDto productDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -60,6 +64,7 @@ namespace Market.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -79,6 +84,7 @@ namespace Market.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _service.GetById(id);
@@ -88,6 +94,7 @@ namespace Market.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var products = await _service.GetAll();
@@ -95,6 +102,7 @@ namespace Market.Controllers
         }
 
         [HttpGet("paged")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string orderBy = null, [FromQuery] decimal? price = null)
         {
             try
@@ -107,6 +115,32 @@ namespace Market.Controllers
                 _logger.LogError(ex, "Error retrieving paginated products");
                 return StatusCode(500, "An error occurred while retrieving products");
             }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(string searchText)
+        {
+            try
+            {
+                var products = await _service.SearchProducts(searchText);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching for products");
+                return StatusCode(500, "An error occurred while searching for products");
+            }
+        }
+
+        [HttpGet("subcategory/{subcategoryId}")]
+        public async Task<IActionResult> GetBySubcategory(int subcategoryId)
+        {
+            var products = await _service.GetBySubcategoryAsync(subcategoryId);
+            if (products == null || !products.Any())
+            {
+                return NotFound("No products found for the specified subcategory.");
+            }
+            return Ok(products);
         }
 
     }

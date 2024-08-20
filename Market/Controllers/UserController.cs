@@ -95,6 +95,7 @@ namespace Market.Controllers
         [Authorize]
         public async Task<IActionResult> Update([FromBody] UpdateUserDto body)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             var userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             if (body == null) return BadRequest("User data is required");

@@ -31,8 +31,6 @@ namespace Market.Mappings
 
             CreateMap<UpdateUserDto, User>();
 
-            CreateMap<CreateRoleDto, Role>();
-
             CreateMap<Role, RoleDto>();
 
             CreateMap<RoleDto, UserRole>();
