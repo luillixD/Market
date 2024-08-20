@@ -73,6 +73,21 @@ namespace Market.Data.Repositories
                               .ToListAsync();
         }
 
+        public async Task<IEnumerable<Product>> SearchProducts(string searchText)
+        {
+            return await _context.Products
+                                 .Where(p => p.Name.Contains(searchText) || p.Description.Contains(searchText))
+                                 .Where(p => !p.IsDeleted)
+                                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetBySubcategoryAsync(int subcategoryId)
+        {
+            return await _context.Products
+                                 .Where(p => p.SubcategoryId == subcategoryId && !p.IsDeleted)
+                                 .ToListAsync();
+        }
+
         public async Task<bool> Exists(int productId)
         {
             return await _context.Products.AnyAsync(p => p.Id == productId && !p.IsDeleted);
