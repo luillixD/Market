@@ -9,8 +9,10 @@ namespace Market.DTOs.Purchase
         public int Id { get; set; }
         public string UserName { get; set; }
         public AddressDto AddressDto { get; set; }
-        public Delivery DeliveryType { get; set; }
-        public PurchaseStatus Status { get; set; }
+        public string DeliveryType { get; set; }
+        public Delivery DeliveryTypeCode { get; set; }
+        public string Status { get; set; }
+        public PurchaseStatus StatusCode { get; set; }
         public List<ProductDto> Products { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Total { get; set; }

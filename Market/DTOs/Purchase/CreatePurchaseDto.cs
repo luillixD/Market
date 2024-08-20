@@ -6,7 +6,7 @@ namespace Market.DTOs.Bill
     public class CreatePurchaseDto
     {
         [StringLength(60, ErrorMessage = "Aditional data cannot exceed 60 characters")]
-        public string AditionalData { get; set; }
+        public string AdditionalData { get; set; }
         public decimal Latitud { get; set; }
         public decimal Longitud { get; set; }
         [Required]

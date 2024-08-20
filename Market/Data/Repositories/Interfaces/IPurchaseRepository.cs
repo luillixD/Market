@@ -1,13 +1,13 @@
-﻿using Market.Models;
+﻿using Market.DTOs.Purchase;
+using Market.Models;
 
 namespace Market.Data.Repositories.Interfaces
 {
     public interface IPurchaseRepository
     {
         Task<Purchase> GetByIdAsync(int id);
-        Task<IEnumerable<Purchase>> GetAllAsync();
         Task<bool> AddAsync(Purchase purchase);
-        Task UpdateAsync(Purchase purchase);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(Purchase purchase);
+        Task<List<Purchase>> GetPurchasesResumeAsync(int userId, int page, int pageSize);
     }
 }

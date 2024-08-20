@@ -9,30 +9,24 @@ namespace Market.Models
         public decimal Total { get; set; }
         public Delivery DeliveryType { get; set; }
         public PurchaseStatus Status { get; set; }
-
-        // Relación con User
         public int UserId { get; set; }
         public User User { get; set; }
-
-        public int? AddressId { get; set; }
-        public Address? Address { get; set; }
-
-        // Relación con productos
+        public int AddressId { get; set; }
+        public Address Address { get; set; }
         public ICollection<PurchaseProducts> PurchaseProducts { get; set; } = new List<PurchaseProducts>();
-
-
 
         public enum Delivery
         {
-            Local,
-            Express
+            Local = 1,
+            Express = 2
         }
 
         public enum PurchaseStatus
         {
             Pending = 1,
             Done = 2,
-            Reject = 3
+            Reject = 3,
+            Accept = 4
         }
     }
 }
