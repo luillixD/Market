@@ -17,6 +17,5 @@ namespace Market.Services.Interfaces
         public Task<bool> AcceptPurchase(int id);
         public Task<bool> DonePurchase(int id);
         public Task<List<PurchaseResumeDto>> PurchaseResume(int userId, int page, int pageSize);
-        public Task<bool> UpdatePurchase(List<int> productsId, int purchaseIde);
     }
 }

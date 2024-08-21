@@ -113,7 +113,6 @@ namespace Market.Controllers
         }
 
         [HttpPost("/api/[controller]/amount")]
-        [Authorize]
         public async Task<IActionResult> Amount([FromBody] ProductsIdDto products)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -123,7 +122,7 @@ namespace Market.Controllers
             {
                 return Ok(new TotalDto { Subtotal = 0, Total = 0 });
             }
-            var result = _service.TotalAmount(requets);
+            var result = await _service.TotalAmount(requets);
 
             return Ok(result);
         }

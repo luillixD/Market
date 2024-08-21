@@ -15,11 +15,6 @@ namespace Market.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<CreateUserDto, User>()
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-                .ForMember(dest => dest.IsActiveUser, opt => opt.MapFrom(src => false))
-                .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
-
             CreateMap<User, UserDto>().ReverseMap();
 
             CreateMap<RegisterDto, User>()
@@ -32,10 +27,6 @@ namespace Market.Mappings
             CreateMap<UpdateUserDto, User>();
 
             CreateMap<Role, RoleDto>();
-
-            CreateMap<RoleDto, UserRole>();
-
-            CreateMap<UpdateRoleDto, Role>();
 
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.Subcategory.Name))
@@ -57,8 +48,8 @@ namespace Market.Mappings
             CreateMap<CreatePurchaseDto, Purchase>()
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => new Address 
             { 
-                Latitud = src.Latitud, 
-                Longitud = src.Longitud, 
+                Latitude = src.Latitud, 
+                Longitude = src.Longitud, 
                 AdditionalData = src.AdditionalData 
             }))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1))

@@ -3,13 +3,8 @@ using Market.Data.Repositories.Interfaces;
 using Market.DTOs.Bill;
 using Market.DTOs.Product;
 using Market.DTOs.Purchase;
-using Market.DTOs.Users;
-using Market.Middleware;
-using Market.Migrations;
 using Market.Models;
 using Market.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Market.Services
 {
@@ -35,7 +30,7 @@ namespace Market.Services
             decimal total = 0;
             decimal subTotal = 0;
 
-            var products = IsExistProducts(productsId);
+            var products = await IsExistProducts(productsId);
 
             foreach (var product in products)
             {
@@ -50,19 +45,18 @@ namespace Market.Services
 
             if(purchase.DeliveryType == Purchase.Delivery.Express)
             {
-                if(string.IsNullOrWhiteSpace(purchase.Address.AdditionalData)) throw new Exception("Additional Data of address is required");
+                if(string.IsNullOrWhiteSpace(purchase.Address.AdditionalData)) throw new ArgumentException("Additional Data of address is required");
             }
             else if(purchase.DeliveryType == Purchase.Delivery.Local)
             {
                 purchase.Address.AdditionalData = "N/A";
-                purchase.Address.Latitud = 0;
-                purchase.Address.Longitud = 0;
+                purchase.Address.Latitude = 0;
+                purchase.Address.Longitude = 0;
             }
 
+            var impuesto = subTotal * 0.13m;
 
-            var impuesto = (double)subTotal * 0.13;
-
-            total = subTotal + (decimal)impuesto;
+            total = subTotal + impuesto;
 
             purchase.Total = Math.Round(total, 2);
             purchase.SubTotal = Math.Round(subTotal, 2);
@@ -71,35 +65,33 @@ namespace Market.Services
             return result;
         }
 
-        private List<Product> IsExistProducts(List<int> productsId)
+        private async Task<List<Product>> IsExistProducts(List<int> productsId)
         {
-            List<Product> products = new List<Product>();
-            foreach (var productId in productsId)
-            {
-                Product product = _productRepository.GetById(productId).Result;
-                if (product == null) throw new Exception("Product not exist");
-                products.Add(product);
-            }
+            List<Product> products = _productRepository.GetListOfProducts(productsId).Result;
+
+            var productsNotFound = productsId.Except(products.Select(p => p.Id)).ToList();
+            if (productsNotFound.Any())
+                throw new Exception($"Products with IDs {string.Join(", ", productsNotFound)} not found.");
+
             return products;
         }
 
-        public Task<TotalDto> TotalAmount(List<int> productsId)
+        public async Task<TotalDto> TotalAmount(List<int> productsId)
         {
             decimal total = 0;
             decimal subTotal = 0;
 
-            var products = IsExistProducts(productsId);
+            var products = await IsExistProducts(productsId);
 
             foreach (var product in products)
             {
-                if (product == null) throw new Exception("Product not exist");
                 subTotal += product.Price;
             }
-            var impuesto = (double)subTotal * 0.13;
+            var impuesto = subTotal * 0.13m;
 
-            total = subTotal + (decimal)impuesto;
+            total = subTotal + impuesto;
 
-            return Task<TotalDto>.FromResult(new TotalDto { Subtotal = subTotal, Total = total });
+            return new TotalDto { Subtotal = subTotal, Total = total };
         }
 
         public async Task<PurchaseDto> GetById(int id)
@@ -107,17 +99,17 @@ namespace Market.Services
             var purchase = await _purchaseRepository.GetByIdAsync(id);
             if (purchase == null) throw new Exception("Purchase not found");
 
-            var products = await GetProducts(purchase.PurchaseProducts.ToList());
+            var products = GetProducts(purchase.PurchaseProducts.ToList());
 
             PurchaseDto purchaseReponse = _mapper.Map<PurchaseDto>(purchase);
             if (purchase.DeliveryType == Purchase.Delivery.Express)
             {
-                var address = new DTOs.Address.AddressDto { AditionalData = purchase.Address.AdditionalData, Latitud = purchase.Address.Latitud, Longitud = purchase.Address.Longitud };
+                var address = new DTOs.Address.AddressDto { AditionalData = purchase.Address.AdditionalData, Latitud = purchase.Address.Latitude, Longitud = purchase.Address.Longitude };
                 purchaseReponse.AddressDto = address;
             }
 
-            purchaseReponse.Status = await StatusType(purchase.Status);
-            purchaseReponse.DeliveryType = await DeliveryType(purchase.DeliveryType);
+            purchaseReponse.Status = StatusType(purchase.Status);
+            purchaseReponse.DeliveryType = DeliveryType(purchase.DeliveryType);
 
             purchaseReponse.DeliveryTypeCode = purchase.DeliveryType;
             purchaseReponse.StatusCode = purchase.Status;
@@ -133,17 +125,17 @@ namespace Market.Services
             if (purchase == null) throw new Exception("Purchase not found");
             if (purchase.UserId != userId) throw new Exception("Purchase not found");
 
-            var products = await GetProducts(purchase.PurchaseProducts.ToList());
+            var products = GetProducts(purchase.PurchaseProducts.ToList());
 
             PurchaseDto purchaseReponse = _mapper.Map<PurchaseDto>(purchase);
             if (purchase.DeliveryType == Purchase.Delivery.Express)
             {
-                var address = new DTOs.Address.AddressDto { AditionalData = purchase.Address.AdditionalData, Latitud = purchase.Address.Latitud, Longitud = purchase.Address.Longitud };
+                var address = new DTOs.Address.AddressDto { AditionalData = purchase.Address.AdditionalData, Latitud = purchase.Address.Latitude, Longitud = purchase.Address.Longitude };
                 purchaseReponse.AddressDto = address;
             }
 
-            purchaseReponse.Status = await StatusType(purchase.Status);
-            purchaseReponse.DeliveryType = await DeliveryType(purchase.DeliveryType);
+            purchaseReponse.Status = StatusType(purchase.Status);
+            purchaseReponse.DeliveryType = DeliveryType(purchase.DeliveryType);
 
             purchaseReponse.DeliveryTypeCode = purchase.DeliveryType;
             purchaseReponse.StatusCode = purchase.Status;
@@ -153,13 +145,13 @@ namespace Market.Services
             return purchaseReponse;
         }
 
-        private async Task<string> DeliveryType (Purchase.Delivery delivery)
+        private string DeliveryType (Purchase.Delivery delivery)
         {
             if (delivery == Purchase.Delivery.Express) return "Express";
             return "Local";
         }
 
-        private async Task<string> StatusType(Purchase.PurchaseStatus status)
+        private string StatusType(Purchase.PurchaseStatus status)
         {
             if (status == Purchase.PurchaseStatus.Pending) return "Pending";
             else if (status == Purchase.PurchaseStatus.Accept) return "Accept";
@@ -168,7 +160,7 @@ namespace Market.Services
             return "Pending";
         }
 
-        private async Task<List<ProductDto>> GetProducts(List<PurchaseProducts> purchaseProducts)
+        private List<ProductDto> GetProducts(List<PurchaseProducts> purchaseProducts)
         {
             List<ProductDto> products = new List<ProductDto>();
             foreach (var purchaseProduct in purchaseProducts)
