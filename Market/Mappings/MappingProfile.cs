@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Market.DTOs.Bill;
 using Market.DTOs.Category;
 using Market.DTOs.Login;
 using Market.DTOs.Product;
+using Market.DTOs.Purchase;
 using Market.DTOs.Roles;
 using Market.DTOs.Subcategory;
 using Market.DTOs.Users;
@@ -13,9 +15,7 @@ namespace Market.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<User, UserDto>();
-
-            CreateMap<UserDto, User>();
+            CreateMap<User, UserDto>().ReverseMap();
 
             CreateMap<RegisterDto, User>()
             .ForMember(dest => dest.IsActiveUser, opt => opt.MapFrom(src => false))
@@ -28,9 +28,9 @@ namespace Market.Mappings
 
             CreateMap<Role, RoleDto>();
 
-            CreateMap<RoleDto, UserRole>();
-
-            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.Subcategory.Name))
+                .ReverseMap();
             CreateMap<Product, CreateProductDto>().ReverseMap();
             CreateMap<Product, UpdateProductDto>().ReverseMap();
 
@@ -45,6 +45,22 @@ namespace Market.Mappings
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<Category, CategoryDto>();
 
+            CreateMap<CreatePurchaseDto, Purchase>()
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => new Address 
+            { 
+                Latitude = src.Latitud, 
+                Longitude = src.Longitud, 
+                AdditionalData = src.AdditionalData 
+            }))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 1))
+            .ForMember(dest => dest.SubTotal, opt => opt.MapFrom(src => 0))
+            .ForMember(dest => dest.Total, opt => opt.MapFrom(src => 0));
+
+
+            CreateMap<PurchaseDto, Purchase>();
+
+            CreateMap<Purchase, PurchaseDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName));
         }
     }
 }
