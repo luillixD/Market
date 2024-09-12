@@ -44,14 +44,14 @@ namespace Market
                         logger.LogInformation("Database is up to date. No migrations needed.");
                     }
 
-                    // Aquí puedes añadir lógica para sembrar datos iniciales si es necesario
+                    // Aquï¿½ puedes aï¿½adir lï¿½gica para sembrar datos iniciales si es necesario
                     DatabaseSeeder.SeedData(services);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while migrating or initializing the database.");
-                    throw; // Re-lanza la excepción para asegurar que la aplicación no se inicie con una base de datos en mal estado
+                    throw; // Re-lanza la excepciï¿½n para asegurar que la aplicaciï¿½n no se inicie con una base de datos en mal estado
                 }
             }
 
@@ -63,11 +63,11 @@ namespace Market
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            // Configuración básica
+            // Configuraciï¿½n bï¿½sica
             services.AddControllers();
             services.AddEndpointsApiExplorer();
 
-            // Configuración de la base de datos
+            // Configuraciï¿½n de la base de datos
             var connectionString = configuration.GetConnectionString("DataBase");
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -92,6 +92,8 @@ namespace Market
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
 
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
             services.AddScoped<IPurchaseService, PurchaseService>();
             services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
@@ -101,13 +103,13 @@ namespace Market
             services.AddScoped<IS3Service, S3Service>();
             services.Configure<AWSOptions>(configuration.GetSection("AWS"));
 
-            // Configuración de AutoMapper
+            // Configuraciï¿½n de AutoMapper
             services.AddAutoMapper(typeof(MappingProfile));
 
-            // Configuración de Swagger
+            // Configuraciï¿½n de Swagger
             services.AddSwaggerGen();
 
-            // Configuración de CORS
+            // Configuraciï¿½n de CORS
             var UrlUI = configuration.GetSection("URLs")["UI"];
             services.AddCors(options =>
             {
@@ -121,7 +123,7 @@ namespace Market
 
             services.ConfigureJwtAuthentication(configuration);
 
-            // TODO: Considera añadir Health Checks
+            // TODO: Considera aï¿½adir Health Checks
             // services.AddHealthChecks();
         }
 
@@ -133,14 +135,14 @@ namespace Market
             // Middleware de seguridad
             app.UseHttpsRedirection();
 
-            // Configuración de CORS (debe ir antes de la autorización)
+            // Configuraciï¿½n de CORS (debe ir antes de la autorizaciï¿½n)
             app.UseCors("OnlyOurURLs");
 
-            // Middleware de autenticación y autorización
+            // Middleware de autenticaciï¿½n y autorizaciï¿½n
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Configuración de Swagger (solo en desarrollo)
+            // Configuraciï¿½n de Swagger (solo en desarrollo)
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -150,7 +152,7 @@ namespace Market
             // Mapeo de controladores
             app.MapControllers();
 
-            // Asegurar que la base de datos está creada y las migraciones aplicadas
+            // Asegurar que la base de datos estï¿½ creada y las migraciones aplicadas
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -158,7 +160,7 @@ namespace Market
                 context.Database.Migrate();
             }
 
-            // TODO: Considera añadir el endpoint de Health Checks
+            // TODO: Considera aï¿½adir el endpoint de Health Checks
             // app.MapHealthChecks("/health");
         }
     }

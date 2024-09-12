@@ -10,5 +10,6 @@ namespace Market.Services.Interfaces
         Task<IEnumerable<User>> GetAll(int page, int pageSize);
         Task <RoleDto> GetUserRoles(int userId);
         Task Delete(int userId);
+        Task<bool> Exists(int userId);
     }
 }

@@ -30,5 +30,6 @@ namespace Market.Models
         public bool IsActiveUser { get; set; } = false;
 
         public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<Review> Reviews { get; set; }
     }
 }

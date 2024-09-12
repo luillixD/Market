@@ -3,6 +3,7 @@ using System;
 using Market.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,35 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Market.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240815043123_ReviewMigration")]
+    partial class ReviewMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            modelBuilder.Entity("Market.Models.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("AdditionalData")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Addresses");
-                });
 
             modelBuilder.Entity("Market.Models.Category", b =>
                 {
@@ -98,53 +80,41 @@ namespace Market.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Market.Models.Purchase", b =>
+            modelBuilder.Entity("Market.Models.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("AddressId")
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsApproved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DeliveryType")
+                    b.Property<int>("Rating")
                         .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressId")
-                        .IsUnique();
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Purchase");
-                });
-
-            modelBuilder.Entity("Market.Models.PurchaseProducts", b =>
-                {
-                    b.Property<int>("PurchaseId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PurchaseId", "ProductId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("PurchaseProducts");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Market.Models.Role", b =>
@@ -261,40 +231,23 @@ namespace Market.Migrations
                     b.Navigation("Subcategory");
                 });
 
-            modelBuilder.Entity("Market.Models.Purchase", b =>
-                {
-                    b.HasOne("Market.Models.Address", "Address")
-                        .WithOne("Purchase")
-                        .HasForeignKey("Market.Models.Purchase", "AddressId");
-
-                    b.HasOne("Market.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Address");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Market.Models.PurchaseProducts", b =>
+            modelBuilder.Entity("Market.Models.Review", b =>
                 {
                     b.HasOne("Market.Models.Product", "Product")
-                        .WithMany("PurchaseProducts")
+                        .WithMany("Reviews")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Market.Models.Purchase", "Purchase")
-                        .WithMany("PurchaseProducts")
-                        .HasForeignKey("PurchaseId")
+                    b.HasOne("Market.Models.User", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
 
-                    b.Navigation("Purchase");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Market.Models.Subcategory", b =>
@@ -327,12 +280,6 @@ namespace Market.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Market.Models.Address", b =>
-                {
-                    b.Navigation("Purchase")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Market.Models.Category", b =>
                 {
                     b.Navigation("Subcategories");
@@ -340,12 +287,7 @@ namespace Market.Migrations
 
             modelBuilder.Entity("Market.Models.Product", b =>
                 {
-                    b.Navigation("PurchaseProducts");
-                });
-
-            modelBuilder.Entity("Market.Models.Purchase", b =>
-                {
-                    b.Navigation("PurchaseProducts");
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Market.Models.Role", b =>

@@ -3,6 +3,7 @@ using Market.DTOs.Bill;
 using Market.DTOs.Category;
 using Market.DTOs.Login;
 using Market.DTOs.Product;
+using Market.DTOs.Review;
 using Market.DTOs.Purchase;
 using Market.DTOs.Roles;
 using Market.DTOs.Subcategory;
@@ -61,6 +62,11 @@ namespace Market.Mappings
 
             CreateMap<Purchase, PurchaseDto>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName));
+            
+            CreateMap<Review, ReviewDto>();
+            CreateMap<CreateReviewDto, Review>()
+                .ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now));
         }
     }
 }

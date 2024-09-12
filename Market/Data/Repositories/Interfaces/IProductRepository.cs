@@ -12,5 +12,6 @@ namespace Market.Data.Repositories.Interfaces
         Task<IEnumerable<Product>> GetPaged(int pageNumber, int pageSize, string orderBy, decimal? price);
         Task<IEnumerable<Product>> SearchProducts(string searchText);
         Task<IEnumerable<Product>> GetBySubcategoryAsync(int subcategoryId);
+        Task<bool> Exists(int productId);
     }
 }

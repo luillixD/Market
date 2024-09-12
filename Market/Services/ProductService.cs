@@ -114,5 +114,10 @@ namespace Market.Services
             var products = await _repository.GetBySubcategoryAsync(subcategoryId);
             return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
+
+        public async Task<bool> Exists(int productId)
+        {
+            return await _repository.Exists(productId);
+        }
     }
 }
