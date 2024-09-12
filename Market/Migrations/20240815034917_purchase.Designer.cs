@@ -3,6 +3,7 @@ using System;
 using Market.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Market.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240815034917_purchase")]
+    partial class purchase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,14 +28,14 @@ namespace Market.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("AdditionalData")
+                    b.Property<string>("AditionalData")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<decimal>("Latitude")
+                    b.Property<decimal>("Latitud")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<decimal>("Longitude")
+                    b.Property<decimal>("Longitud")
                         .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
@@ -104,7 +107,7 @@ namespace Market.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("AddressId")
+                    b.Property<int?>("AddressId")
                         .HasColumnType("int");
 
                     b.Property<int>("DeliveryType")
@@ -360,8 +363,6 @@ namespace Market.Migrations
 
             modelBuilder.Entity("Market.Models.User", b =>
                 {
-                    b.Navigation("Reviews");
-
                     b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618

@@ -1,6 +1,8 @@
-﻿using Market.Models;
+﻿using Market.DTOs.Product;
+using Market.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using static Mysqlx.Crud.Order.Types;
 
 namespace Market.Data
 {
@@ -18,6 +20,10 @@ namespace Market.Data
         public DbSet<Subcategory> Subcategories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Purchase> Purchase { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<PurchaseProducts> PurchaseProducts { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -132,28 +138,55 @@ namespace Market.Data
                     .HasForeignKey(p => p.SubcategoryId);
             });
 
+            modelBuilder.Entity<Purchase>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SubTotal)
+                    .IsRequired();
+                entity.Property(e => e.Total)
+                    .IsRequired();
+                entity.Property(e => e.Status)
+                    .IsRequired();
+                entity.Property(e => e.DeliveryType)
+                    .IsRequired();
+                entity.HasOne(p => p.Address)
+                    .WithOne(a => a.Purchase)
+                    .HasForeignKey<Purchase>(p => p.AddressId)
+                    .IsRequired(false);
+            });
+
+            modelBuilder.Entity<PurchaseProducts>(entity =>
+            {
+                // Definir clave compuesta
+                entity.HasKey(e => new { e.PurchaseId, e.ProductId });
+
+                // Relación con Purchase (muchos a uno)
+                entity.HasOne(pp => pp.Purchase)
+                    .WithMany(p => p.PurchaseProducts)
+                    .HasForeignKey(pp => pp.PurchaseId);
+
+                // Relación con Product (muchos a uno)
+                entity.HasOne(pp => pp.Product)
+                    .WithMany(p => p.PurchaseProducts)
+                    .HasForeignKey(pp => pp.ProductId);
+            });
+
             // Configure Review entity
             modelBuilder.Entity<Review>(entity =>
             {
                 entity.HasKey(e => e.Id);
-
                 entity.Property(e => e.Comment)
                     .IsRequired()
                     .HasMaxLength(500);
-
                 entity.Property(e => e.Rating)
                     .IsRequired();
-
                 entity.Property(e => e.IsApproved)
                     .HasDefaultValue(false);
-
                 entity.Property(e => e.CreatedAt)
                     .IsRequired();
-
                 entity.HasOne(r => r.Product)
                     .WithMany(p => p.Reviews)
                     .HasForeignKey(r => r.ProductId);
-
                 entity.HasOne(r => r.User)
                     .WithMany(u => u.Reviews)
                     .HasForeignKey(r => r.UserId);

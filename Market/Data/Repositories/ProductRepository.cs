@@ -34,6 +34,13 @@ namespace Market.Data.Repositories
                                  .FirstOrDefaultAsync();
         }
 
+        public async Task<List<Product>> GetListOfProducts(List<int> productsId)
+        {
+            return await _context.Products
+                                 .Where(p => productsId.Contains(p.Id) && !p.IsDeleted)
+                                 .ToListAsync();
+        }
+
         public async Task<IEnumerable<Product>> GetAll()
         {
             return await _context.Products

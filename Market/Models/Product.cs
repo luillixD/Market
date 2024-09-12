@@ -11,5 +11,7 @@
         public int SubcategoryId { get; set; }
         public Subcategory Subcategory { get; set; }
         public ICollection<Review> Reviews { get; set; }
+        public ICollection<PurchaseProducts> PurchaseProducts { get; set; }
+
     }
 }
